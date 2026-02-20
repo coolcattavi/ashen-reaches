@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Ashen Reaches</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Reset & Base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ash:           #1A1714;
+      --ember:         #C45C1A;
+      --ironstone:     #8A8478;
+      --parchment:     #E8DCC8;
+      --bone:          #F0EDE8;
+      --ash-mid:       #2A2420;
+      --ironstone-dim: #3A3630;
+      --leather-dark:  #1E1710;
+      --leather-mid:   #2C2018;
+      --leather-edge:  #3A2A1C;
+      --error:         #a84040;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--ash);
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 15.5px;
+      overflow: hidden;
+    }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+
+    /* ════════════════════════════════════════════════════════════
+       SETUP OVERLAY
+    ════════════════════════════════════════════════════════════ */
+    #setupOverlay {
+      position: fixed; inset: 0;
+      background: var(--ash);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s ease;
+    }
+
+    #setupOverlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .setup-shell {
+      width: 100%;
+      max-width: 620px;
+      padding: 0 24px;
+    }
+
+    /* Progress dots */
+    .setup-progress {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 48px;
+    }
+
+    .progress-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--ironstone-dim);
+      border: 1px solid var(--ironstone-dim);
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .progress-dot.active {
+      background: var(--ember);
+      border-color: var(--ember);
+      box-shadow: 0 0 8px rgba(196,92,26,0.6);
+    }
+
+    .progress-dot.done {
+      background: var(--ironstone);
+      border-color: var(--ironstone);
+    }
+
+    /* Individual screen cards */
+    .setup-screen {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .setup-screen.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .setup-eyebrow {
+      font-size: 0.6rem;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      margin-bottom: 12px;
+    }
+
+    .setup-title {
+      font-family: 'IM Fell English', serif;
+      font-size: 2rem;
+      color: var(--parchment);
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+
+    .setup-prose {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--ironstone);
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    .setup-divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--ironstone-dim), transparent);
+      margin-bottom: 32px;
+    }
+
+    /* Input fields */
+    .setup-field { margin-bottom: 24px; }
+
+    .setup-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .setup-label-text {
+      font-size: 0.62rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+    }
+
+    .setup-char-count {
+      font-size: 0.6rem;
+      color: var(--ironstone-dim);
+      letter-spacing: 0.1em;
+    }
+
+    .setup-char-count.warn { color: var(--ember); }
+
+    .setup-input {
+      width: 100%;
+      background: var(--ash-mid);
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      padding: 12px 14px;
+      color: var(--bone);
+      font-family: 'IM Fell English', serif;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .setup-input::placeholder { color: #4a4540; font-style: italic; }
+    .setup-input:focus { border-color: var(--ironstone); box-shadow: 0 0 0 2px rgba(138,132,120,0.15); }
+    .setup-input.error { border-color: var(--error); }
+
+    .setup-error {
+      font-size: 0.62rem;
+      color: var(--error);
+      margin-top: 5px;
+      letter-spacing: 0.1em;
+      display: none;
+    }
+
+    .setup-error.visible { display: block; }
+
+    /* Choice buttons */
+    .setup-choices { display: grid; gap: 10px; }
+    .setup-choices.two-col { grid-template-columns: 1fr 1fr; }
+
+    .choice-btn {
+      padding: 16px 20px;
+      background: var(--ash-mid);
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+
+    .choice-btn::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0; width: 2px;
+      background: var(--ironstone-dim);
+      transition: background 0.2s;
+    }
+
+    .choice-btn:hover { border-color: var(--ironstone); background: #252018; }
+
+    .choice-btn.selected { border-color: var(--ember); background: rgba(196,92,26,0.08); }
+    .choice-btn.selected::before { background: var(--ember); }
+
+    .choice-btn .choice-title { display: block; font-weight: 600; margin-bottom: 4px; }
+
+    .choice-btn .choice-sub {
+      font-size: 0.6rem;
+      color: var(--ironstone);
+      letter-spacing: 0.1em;
+      text-transform: none;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    /* Baseline number inputs */
+    .baseline-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+    .baseline-field { display: flex; flex-direction: column; gap: 6px; }
+
+    .baseline-label {
+      font-size: 0.6rem; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--ironstone);
+    }
+
+    .baseline-sublabel {
+      font-size: 0.58rem; color: var(--ironstone-dim);
+      font-family: 'IM Fell English', serif; font-style: italic;
+    }
+
+    .setup-number {
+      width: 100%;
+      background: var(--ash-mid);
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      padding: 10px 12px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem; font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+
+    .setup-number::-webkit-outer-spin-button,
+    .setup-number::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .setup-number:focus { border-color: var(--ironstone); }
+
+    .baseline-unit { font-size: 0.6rem; color: var(--ironstone); letter-spacing: 0.15em; }
+
+    .setup-skip {
+      font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--ironstone-dim);
+      background: none; border: none; cursor: pointer; padding: 0; margin-top: 12px;
+      text-decoration: underline; text-underline-offset: 3px;
+      transition: color 0.2s;
+    }
+
+    .setup-skip:hover { color: var(--ironstone); }
+
+    /* Nav row */
+    .setup-nav {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 36px;
+    }
+
+    .nav-back {
+      font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--ironstone);
+      background: none; border: none; cursor: pointer; padding: 0;
+      transition: color 0.2s;
+    }
+
+    .nav-back:hover { color: var(--bone); }
+    .nav-back:disabled { opacity: 0; pointer-events: none; }
+
+    .nav-forward {
+      padding: 12px 28px;
+      background: linear-gradient(135deg, var(--leather-edge), var(--leather-dark));
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 600;
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .nav-forward::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0; width: 2px;
+      background: var(--ironstone);
+      transition: background 0.2s;
+    }
+
+    .nav-forward:hover { border-color: rgba(196,92,26,0.6); background: linear-gradient(135deg, #382818, #1e1208); }
+    .nav-forward:hover::before { background: var(--ember); }
+    .nav-forward.final { border-color: rgba(196,92,26,0.4); color: var(--ember); }
+
+
+    /* ════════════════════════════════════════════════════════════
+       HOME SCREEN
+    ════════════════════════════════════════════════════════════ */
+    .app {
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      height: 100vh;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    /* Hero */
+    .hero { position: relative; width: 100%; height: 38vh; overflow: hidden; }
+
+    .hero-image {
+      width: 100%; height: 100%;
+      background:
+        linear-gradient(to bottom, var(--ash) 0%, transparent 25%, transparent 60%, var(--ash) 100%),
+        linear-gradient(to right,  var(--ash) 0%, transparent 12%, transparent 88%, var(--ash) 100%),
+        linear-gradient(165deg, #0e0d0c 0%, #1a1614 20%, #2a2218 35%, #1e1a14 50%, #140f0a 65%, #0a0908 85%, #060504 100%);
+      background-size: cover, cover, cover;
+      background-position: center;
+    }
+
+    .hero-scene { position: absolute; inset: 0; overflow: hidden; }
+
+    .hero-scene::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 55%;
+      background: linear-gradient(180deg, #0c0b0a 0%, #1a1815 40%, #22201b 100%);
+    }
+
+    .hero-scene::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0; height: 48%;
+      background: linear-gradient(180deg, #1a1714 0%, #141210 100%);
+    }
+
+    .dead-tree {
+      position: absolute; bottom: 38%; left: 18%;
+      width: 3px; height: 120px; background: #0d0c0a;
+      transform-origin: bottom center;
+    }
+
+    .dead-tree::before, .dead-tree::after { content: ''; position: absolute; background: #0d0c0a; }
+
+    .dead-tree::before {
+      top: 28px; left: -18px; width: 2px; height: 55px;
+      transform: rotate(-35deg); transform-origin: bottom right;
+    }
+
+    .dead-tree::after {
+      top: 50px; right: -24px; width: 2px; height: 40px;
+      transform: rotate(40deg); transform-origin: bottom left;
+    }
+
+    .ember-glow {
+      position: absolute; bottom: 42%; right: 26%;
+      width: 80px; height: 30px;
+      background: radial-gradient(ellipse at center, rgba(196,92,26,0.18) 0%, transparent 70%);
+      animation: flicker 4s ease-in-out infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 0.6; transform: scaleX(1); }
+      50%       { opacity: 1;   transform: scaleX(1.2); }
+    }
+
+    .road {
+      position: absolute; bottom: 38%; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 80px;
+      background: linear-gradient(to top, transparent, rgba(50,45,38,0.5));
+    }
+
+    .hero-vignette {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to bottom, var(--ash) 0%, transparent 22%, transparent 55%, var(--ash) 100%),
+        linear-gradient(to right,  var(--ash) 0%, transparent 14%, transparent 86%, var(--ash) 100%);
+    }
+
+    .hero-title {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center; pointer-events: none; z-index: 2;
+    }
+
+    .hero-title h1 {
+      font-family: 'IM Fell English', serif;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      color: var(--parchment);
+      letter-spacing: 0.22em; text-transform: uppercase;
+      text-shadow: 0 0 60px rgba(0,0,0,0.9), 0 2px 4px rgba(0,0,0,0.8);
+      line-height: 1;
+    }
+
+    .hero-title .subtitle {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem; letter-spacing: 0.35em; text-transform: uppercase;
+      color: var(--ironstone); margin-top: 8px;
+    }
+
+    /* Flavour band */
+    .flavour-band {
+      position: relative; padding: 14px 40px; text-align: center;
+      background:
+        linear-gradient(135deg, #2a2418 25%, transparent 25%) -6px 0,
+        linear-gradient(225deg, #2a2418 25%, transparent 25%) -6px 0,
+        linear-gradient(315deg, #2a2418 25%, transparent 25%),
+        linear-gradient(45deg,  #2a2418 25%, transparent 25%);
+      background-size: 12px 12px;
+      background-color: #231e17;
+      border-top: 1px solid rgba(74,82,64,0.3);
+      border-bottom: 1px solid rgba(74,82,64,0.3);
+    }
+
+    .flavour-band::before, .flavour-band::after {
+      content: ''; position: absolute; top: 0; bottom: 0; width: 80px; pointer-events: none;
+    }
+
+    .flavour-band::before { left: 0;  background: linear-gradient(to right, var(--ash), transparent); }
+    .flavour-band::after  { right: 0; background: linear-gradient(to left, var(--ash), transparent); }
+
+    .flavour-text {
+      font-family: 'IM Fell English', serif;
+      font-style: italic; font-size: 1.05rem;
+      color: var(--parchment); opacity: 0.85;
+    }
+
+    /* Panel row */
+    .panel-row {
+      display: grid; grid-template-columns: 260px 1fr 220px;
+      gap: 2px; padding: 2px 0;
+      background: rgba(0,0,0,0.4); min-height: 0;
+    }
+
+    .panel { padding: 20px 22px; position: relative; overflow: hidden; }
+
+    .panel-label {
+      font-size: 0.62rem; letter-spacing: 0.45em; text-transform: uppercase;
+      color: var(--ironstone); margin-bottom: 14px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--ironstone-dim);
+    }
+
+    .stone {
+      background:
+        radial-gradient(ellipse at top left, #2a2720 0%, transparent 60%),
+        radial-gradient(ellipse at bottom right, #1a1714 0%, transparent 50%),
+        #1e1b18;
+    }
+
+    .stone::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(85deg, transparent 0px, transparent 18px, rgba(255,255,255,0.008) 18px, rgba(255,255,255,0.008) 19px),
+        repeating-linear-gradient(5deg,  transparent 0px, transparent 32px, rgba(0,0,0,0.08) 32px, rgba(0,0,0,0.08) 33px);
+      pointer-events: none;
+    }
+
+    .leather {
+      background:
+        radial-gradient(ellipse at top, #2e2014 0%, transparent 50%),
+        radial-gradient(ellipse at bottom left, #1a1008 0%, transparent 60%),
+        var(--leather-mid);
+    }
+
+    .leather::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
+      pointer-events: none;
+    }
+
+    .leather::after {
+      content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, transparent 0%, rgba(196,92,26,0.12) 30%, rgba(196,92,26,0.08) 70%, transparent 100%);
+    }
+
+    /* Left panel */
+    .panel-character { display: flex; flex-direction: column; }
+
+    .char-name {
+      font-family: 'IM Fell English', serif; font-size: 1.35rem;
+      color: var(--parchment); line-height: 1.1; margin-bottom: 4px;
+    }
+
+    .char-origin { font-size: 0.7rem; color: var(--ironstone); font-style: italic; margin-bottom: 20px; line-height: 1.5; }
+
+    .char-meta { display: flex; flex-direction: column; gap: 14px; }
+
+    .meta-row { display: flex; justify-content: space-between; align-items: center; }
+
+    .meta-label { font-size: 0.64rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ironstone); }
+
+    .meta-value { font-size: 0.95rem; font-weight: 600; color: var(--bone); }
+    .meta-value.ember { color: var(--ember); }
+
+    .xp-bar-wrap { display: flex; flex-direction: column; gap: 5px; }
+
+    .xp-bar-track { height: 4px; background: var(--ironstone-dim); border-radius: 2px; overflow: hidden; }
+
+    .xp-bar-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--ember), #d4721f);
+      border-radius: 2px; box-shadow: 0 0 6px rgba(196,92,26,0.5);
+    }
+
+    .xp-label { font-size: 0.6rem; color: var(--ironstone); letter-spacing: 0.2em; }
+
+    .mana-row { margin-top: 4px; }
+
+    .mana-pips { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 5px; }
+
+    .mana-pip {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--ironstone-dim); border: 1px solid rgba(74,82,64,0.5);
+    }
+
+    .mana-pip.filled {
+      background: radial-gradient(circle, #6a8a9a, #4a6878);
+      border-color: #5a7888; box-shadow: 0 0 4px rgba(90,120,140,0.4);
+    }
+
+    .next-race { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--ironstone-dim); }
+
+    .race-title { font-family: 'IM Fell English', serif; font-size: 0.8rem; color: var(--parchment); margin-bottom: 3px; }
+
+    .race-meta { font-size: 0.6rem; color: var(--ironstone); letter-spacing: 0.15em; }
+
+    .race-days { font-size: 1.4rem; font-weight: 600; color: var(--bone); line-height: 1; margin-top: 4px; }
+
+    .race-days span { font-size: 0.6rem; font-weight: 400; color: var(--ironstone); letter-spacing: 0.2em; text-transform: uppercase; margin-left: 4px; }
+
+    /* Centre panel */
+    .panel-stats { border-left: 1px solid rgba(74,82,64,0.15); border-right: 1px solid rgba(74,82,64,0.15); }
+
+    .stats-grid { display: flex; flex-direction: column; gap: 12px; }
+
+    .stat-row { display: grid; grid-template-columns: 110px 1fr 38px; align-items: center; gap: 10px; }
+
+    .stat-name { font-size: 0.66rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ironstone); }
+
+    .stat-world-name {
+      display: block; font-family: 'IM Fell English', serif;
+      font-size: 0.74rem; color: var(--parchment); opacity: 0.55;
+      margin-top: 2px; letter-spacing: 0.05em;
+    }
+
+    .stat-bar-track { height: 6px; background: var(--ironstone-dim); border-radius: 3px; overflow: hidden; position: relative; }
+
+    .stat-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #3a4a32, #5a6a50); position: relative; transition: width 0.8s ease; }
+
+    .stat-bar-fill::after { content: ''; position: absolute; top: 0; right: 0; width: 2px; height: 100%; background: rgba(255,255,255,0.3); }
+
+    .stat-bar-fill.endurance { background: linear-gradient(90deg, #3a5a3a, #5a8a5a); }
+    .stat-bar-fill.iron      { background: linear-gradient(90deg, #4a4a5a, #6a6a8a); }
+    .stat-bar-fill.force     { background: linear-gradient(90deg, #5a3a2a, #8a5a3a); }
+    .stat-bar-fill.core      { background: linear-gradient(90deg, #4a4a3a, #6a6a5a); }
+    .stat-bar-fill.resolve   { background: linear-gradient(90deg, #3a2a4a, #6a4a8a); box-shadow: 0 0 8px rgba(106,74,138,0.4); }
+    .stat-bar-fill.lore      { background: linear-gradient(90deg, #2a3a4a, #4a6a8a); }
+
+    .stat-value { font-size: 0.85rem; font-weight: 500; color: var(--bone); text-align: right; }
+
+    .readiness-wrap { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--ironstone-dim); }
+
+    .readiness-inner { display: flex; justify-content: space-between; align-items: center; }
+
+    .readiness-label { font-size: 0.6rem; letter-spacing: 0.35em; text-transform: uppercase; color: var(--ironstone); }
+
+    .readiness-score { font-size: 1.6rem; font-weight: 600; color: var(--ember); text-shadow: 0 0 20px rgba(196,92,26,0.35); line-height: 1; }
+
+    .readiness-sub { font-size: 0.6rem; color: var(--ironstone); text-align: right; margin-top: 2px; }
+
+    .readiness-bar-track { margin-top: 8px; height: 3px; background: var(--ironstone-dim); border-radius: 2px; overflow: hidden; }
+
+    .readiness-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--ember), #d4721f); box-shadow: 0 0 8px rgba(196,92,26,0.5); border-radius: 2px; }
+
+    /* Right panel */
+    .panel-actions { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+
+    .action-btn {
+      display: block; width: 100%; padding: 14px 16px;
+      background: linear-gradient(135deg, var(--leather-edge) 0%, var(--leather-dark) 100%);
+      border: 1px solid rgba(74,82,64,0.35); border-radius: 2px;
+      color: var(--bone); font-family: 'Inter', sans-serif;
+      font-size: 0.75rem; letter-spacing: 0.25em; text-transform: uppercase;
+      cursor: pointer; text-align: left; position: relative; overflow: hidden;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .action-btn::before {
+      content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 2px;
+      background: var(--ironstone); transition: background 0.2s, width 0.2s;
+    }
+
+    .action-btn:hover { border-color: rgba(196,92,26,0.5); background: linear-gradient(135deg, #382818 0%, #1e1208 100%); }
+    .action-btn:hover::before { background: var(--ember); width: 3px; }
+
+    .action-btn .btn-title { display: block; font-weight: 600; margin-bottom: 3px; }
+    .action-btn .btn-sub { font-size: 0.58rem; color: var(--ironstone); letter-spacing: 0.15em; }
+    .action-btn.primary .btn-title { color: var(--ember); }
+    .panel-actions .panel-label { border-bottom-color: rgba(196,92,26,0.2); }
+
+    /* Phase badge */
+    .phase-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(196,92,26,0.1); border: 1px solid rgba(196,92,26,0.25);
+      border-radius: 2px; padding: 3px 8px;
+      font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--ember); margin-bottom: 14px;
+    }
+
+    .phase-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--ember); box-shadow: 0 0 6px rgba(196,92,26,0.8);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .corner-mark { position: absolute; width: 10px; height: 10px; }
+    .corner-mark.tl { top: 8px; left: 8px;   border-top: 1px solid var(--ironstone); border-left: 1px solid var(--ironstone); }
+    .corner-mark.br { bottom: 8px; right: 8px; border-bottom: 1px solid var(--ironstone); border-right: 1px solid var(--ironstone); }
+
+    /* Streak band */
+    .streak-band {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      background: #131110; border-top: 1px solid var(--ironstone-dim);
+    }
+
+    .streak-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 24px; }
+
+    .streak-item + .streak-item { border-left: 1px solid var(--ironstone-dim); }
+
+    .streak-label { font-size: 0.62rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--ironstone); }
+
+    .streak-number { font-size: 1.1rem; font-weight: 600; color: var(--bone); line-height: 1; }
+    .streak-number span { font-size: 0.6rem; font-weight: 400; color: var(--ironstone); margin-left: 2px; }
+
+  </style>
+</head>
+<body>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     SETUP OVERLAY — shown on first visit only
+══════════════════════════════════════════════════════════════ -->
+<div id="setupOverlay">
+  <div class="setup-shell">
+
+    <div class="setup-progress">
+      <div class="progress-dot active" id="dot-0"></div>
+      <div class="progress-dot"        id="dot-1"></div>
+      <div class="progress-dot"        id="dot-2"></div>
+      <div class="progress-dot"        id="dot-3"></div>
+      <div class="progress-dot"        id="dot-4"></div>
+    </div>
+
+    <!-- Screen 1: Name -->
+    <div class="setup-screen active" id="screen-0">
+      <p class="setup-eyebrow">The Ashen Reaches &nbsp;·&nbsp; First Steps</p>
+      <h2 class="setup-title">Who are you called?</h2>
+      <p class="setup-prose">Before the road begins, before the first step into the cold grey wilderness — you need a name. Not the one given to you. The one you carry into the dark.</p>
+      <div class="setup-divider"></div>
+
+      <div class="setup-field">
+        <div class="setup-label">
+          <span class="setup-label-text">Warrior's Name</span>
+        </div>
+        <input type="text" class="setup-input" id="input-name"
+               placeholder="Enter your warrior's name…"
+               maxlength="40" autocomplete="off" />
+        <p class="setup-error" id="err-name">A name is required to proceed.</p>
+      </div>
+
+      <div class="setup-nav">
+        <button class="nav-back" disabled>← Back</button>
+        <button class="nav-forward" id="btn-next-0" onclick="goNext(0)">Onward →</button>
+      </div>
+    </div>
+
+    <!-- Screen 2: Origin -->
+    <div class="setup-screen" id="screen-1">
+      <p class="setup-eyebrow">The Ashen Reaches &nbsp;·&nbsp; First Steps</p>
+      <h2 class="setup-title">Where do you come from?</h2>
+      <p class="setup-prose">The Reaches do not ask about your past — but you carry it regardless. One sentence. Who were you before this story began?</p>
+      <div class="setup-divider"></div>
+
+      <div class="setup-field">
+        <div class="setup-label">
+          <span class="setup-label-text">Your Origin</span>
+          <span class="setup-char-count" id="count-origin">0 / 100</span>
+        </div>
+        <input type="text" class="setup-input" id="input-origin"
+               placeholder="e.g. A father who let the years get soft around him…"
+               maxlength="100" autocomplete="off" />
+        <p class="setup-error" id="err-origin">An origin is required — even one sentence will do.</p>
+      </div>
+
+      <div class="setup-nav">
+        <button class="nav-back" onclick="goBack(1)">← Back</button>
+        <button class="nav-forward" onclick="goNext(1)">Onward →</button>
+      </div>
+    </div>
+
+    <!-- Screen 3: Vow -->
+    <div class="setup-screen" id="screen-2">
+      <p class="setup-eyebrow">The Ashen Reaches &nbsp;·&nbsp; First Steps</p>
+      <h2 class="setup-title">What drives you forward?</h2>
+      <p class="setup-prose">Every warrior in the Reaches carries a vow — the thing that keeps them moving when the road is cold and the reasons feel distant. State yours plainly. One sentence.</p>
+      <div class="setup-divider"></div>
+
+      <div class="setup-field">
+        <div class="setup-label">
+          <span class="setup-label-text">Your Vow</span>
+          <span class="setup-char-count" id="count-vow">0 / 100</span>
+        </div>
+        <input type="text" class="setup-input" id="input-vow"
+               placeholder="e.g. To prove to my children that the body can be rebuilt…"
+               maxlength="100" autocomplete="off" />
+        <p class="setup-error" id="err-vow">A vow is required — what are you fighting for?</p>
+      </div>
+
+      <div class="setup-nav">
+        <button class="nav-back" onclick="goBack(2)">← Back</button>
+        <button class="nav-forward" onclick="goNext(2)">Onward →</button>
+      </div>
+    </div>
+
+    <!-- Screen 4: Units -->
+    <div class="setup-screen" id="screen-3">
+      <p class="setup-eyebrow">The Ashen Reaches &nbsp;·&nbsp; First Steps</p>
+      <h2 class="setup-title">How do you measure the road?</h2>
+      <p class="setup-prose">These choices cannot be changed after setup without resetting all your logged data. Choose carefully.</p>
+      <div class="setup-divider"></div>
+
+      <div class="setup-field">
+        <div class="setup-label">
+          <span class="setup-label-text">Distance</span>
+        </div>
+        <div class="setup-choices two-col">
+          <button class="choice-btn selected" data-group="distance" data-value="km" onclick="selectChoice(this)">
+            <span class="choice-title">Kilometres</span>
+            <span class="choice-sub">km — used in most Spartan events internationally</span>
+          </button>
+          <button class="choice-btn" data-group="distance" data-value="miles" onclick="selectChoice(this)">
+            <span class="choice-title">Miles</span>
+            <span class="choice-sub">mi — familiar if you trained in the US</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="setup-field">
+        <div class="setup-label">
+          <span class="setup-label-text">Weight</span>
+        </div>
+        <div class="setup-choices two-col">
+          <button class="choice-btn selected" data-group="weight" data-value="kg" onclick="selectChoice(this)">
+            <span class="choice-title">Kilograms</span>
+            <span class="choice-sub">kg — standard metric</span>
+          </button>
+          <button class="choice-btn" data-group="weight" data-value="lbs" onclick="selectChoice(this)">
+            <span class="choice-title">Pounds</span>
+            <span class="choice-sub">lbs — familiar if you trained in the US</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="setup-nav">
+        <button class="nav-back" onclick="goBack(3)">← Back</button>
+        <button class="nav-forward" onclick="goNext(3)">Onward →</button>
+      </div>
+    </div>
+
+    <!-- Screen 5: Baseline -->
+    <div class="setup-screen" id="screen-4">
+      <p class="setup-eyebrow">The Ashen Reaches &nbsp;·&nbsp; First Steps</p>
+      <h2 class="setup-title">Where do you stand today?</h2>
+      <p class="setup-prose">Your honest Day 1 numbers. They anchor the baseline your stats grow from. Leave any field blank if you don't know — the system will begin from zero.</p>
+      <div class="setup-divider"></div>
+
+      <div class="baseline-grid">
+
+        <div class="baseline-field">
+          <span class="baseline-label">Best Hang Time</span>
+          <span class="baseline-sublabel">Iron · The Iron Hand</span>
+          <input type="number" class="setup-number" id="baseline-hang" min="0" max="999" placeholder="0" />
+          <span class="baseline-unit">seconds</span>
+        </div>
+
+        <div class="baseline-field">
+          <span class="baseline-label">Best Push-up Set</span>
+          <span class="baseline-sublabel">Force · The Bearing</span>
+          <input type="number" class="setup-number" id="baseline-pushups" min="0" max="999" placeholder="0" />
+          <span class="baseline-unit">reps</span>
+        </div>
+
+        <div class="baseline-field">
+          <span class="baseline-label">Best Run Distance</span>
+          <span class="baseline-sublabel">Endurance · The Long Road</span>
+          <input type="number" class="setup-number" id="baseline-run" min="0" max="9999" step="0.1" placeholder="0" />
+          <span class="baseline-unit" id="baseline-run-unit">km</span>
+        </div>
+
+      </div>
+
+      <div style="margin-top: 24px;">
+        <button class="setup-skip" onclick="skipBaseline()">Skip — I'll start from zero</button>
+      </div>
+
+      <div class="setup-nav">
+        <button class="nav-back" onclick="goBack(4)">← Back</button>
+        <button class="nav-forward final" onclick="completeSetup()">Enter the Reaches →</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     HOME SCREEN
+══════════════════════════════════════════════════════════════ -->
+<div class="app" id="homeScreen">
+
+  <div class="hero">
+    <div class="hero-scene">
+      <div class="dead-tree"></div>
+      <div class="ember-glow"></div>
+      <div class="road"></div>
+    </div>
+    <div class="hero-image"></div>
+    <div class="hero-vignette"></div>
+    <div class="hero-title">
+      <h1>The Ashen Reaches</h1>
+      <p class="subtitle">Road to the Spartan Trifecta &nbsp;·&nbsp; 2025</p>
+    </div>
+  </div>
+
+  <div class="flavour-band">
+    <p class="flavour-text" id="flavourText">"You are here. That is more than most. Begin."</p>
+  </div>
+
+  <div class="panel-row">
+
+    <div class="panel stone panel-character">
+      <div class="corner-mark tl"></div>
+      <div class="corner-mark br"></div>
+      <div class="panel-label">Warrior</div>
+
+      <div class="phase-badge">
+        <span class="phase-dot"></span>
+        Foundation Phase
+      </div>
+
+      <div class="char-name" id="display-name">—</div>
+      <p class="char-origin" id="display-origin">—</p>
+
+      <div class="char-meta">
+        <div class="meta-row">
+          <span class="meta-label">Character Level</span>
+          <span class="meta-value ember">I</span>
+        </div>
+
+        <div class="xp-bar-wrap">
+          <div class="meta-row">
+            <span class="meta-label">Experience</span>
+            <span class="meta-value" style="font-size:0.75rem">0 / 200 XP</span>
+          </div>
+          <div class="xp-bar-track">
+            <div class="xp-bar-fill" style="width:0%"></div>
+          </div>
+          <span class="xp-label">Next Level: 200 XP required</span>
+        </div>
+
+        <div class="mana-row">
+          <div class="meta-row">
+            <span class="meta-label">Mana</span>
+            <span class="meta-value" style="font-size:0.75rem" id="mana-display">0 / 33</span>
+          </div>
+          <div class="mana-pips" id="manaPips"></div>
+        </div>
+
+        <div class="next-race">
+          <div class="panel-label" style="margin:0 0 8px; padding:0; border:none;">Next Reckoning</div>
+          <div class="race-title">Trial of the Iron Gate</div>
+          <div class="race-meta">Spartan 5K Sprint · May 23, 2025</div>
+          <div class="race-days" id="daysUntil">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel stone panel-stats">
+      <div class="panel-label">Character Stats</div>
+      <div class="stats-grid">
+
+        <div class="stat-row">
+          <div class="stat-name">Endurance<span class="stat-world-name">The Long Road</span></div>
+          <div class="stat-bar-track"><div class="stat-bar-fill endurance" id="bar-endurance" style="width:0%"></div></div>
+          <div class="stat-value" id="val-endurance">0</div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-name">Iron<span class="stat-world-name">The Iron Hand</span></div>
+          <div class="stat-bar-track"><div class="stat-bar-fill iron" id="bar-iron" style="width:0%"></div></div>
+          <div class="stat-value" id="val-iron">0</div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-name">Force<span class="stat-world-name">The Bearing</span></div>
+          <div class="stat-bar-track"><div class="stat-bar-fill force" id="bar-force" style="width:0%"></div></div>
+          <div class="stat-value" id="val-force">0</div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-name">Core<span class="stat-world-name">The Foundation</span></div>
+          <div class="stat-bar-track"><div class="stat-bar-fill core" id="bar-core" style="width:0%"></div></div>
+          <div class="stat-value" id="val-core">0</div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-name">Resolve<span class="stat-world-name">The Source</span></div>
+          <div class="stat-bar-track"><div class="stat-bar-fill resolve" id="bar-resolve" style="width:0%"></div></div>
+          <div class="stat-value" id="val-resolve">0</div>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-name">Lore<span class="stat-world-name">The Knowing</span></div>
+          <div class="stat-bar-track"><div class="stat-bar-fill lore" id="bar-lore" style="width:0%"></div></div>
+          <div class="stat-value" id="val-lore">0</div>
+        </div>
+
+      </div>
+
+      <div class="readiness-wrap">
+        <div class="readiness-inner">
+          <div>
+            <div class="readiness-label">Readiness Score</div>
+            <div style="font-size:0.6rem;color:var(--ironstone);margin-top:2px;">Weighted for Trial of the Iron Gate</div>
+          </div>
+          <div>
+            <div class="readiness-score" id="readiness-score">0</div>
+            <div class="readiness-sub">/ 100</div>
+          </div>
+        </div>
+        <div class="readiness-bar-track">
+          <div class="readiness-bar-fill" id="readiness-bar" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel leather panel-actions">
+      <div class="panel-label">The Road</div>
+
+      <button class="action-btn primary">
+        <span class="btn-title">Log Training</span>
+        <span class="btn-sub">Record today's session</span>
+      </button>
+
+      <button class="action-btn">
+        <span class="btn-title">Venture Out</span>
+        <span class="btn-sub">Face what waits in the dark</span>
+      </button>
+
+      <button class="action-btn">
+        <span class="btn-title">The World</span>
+        <span class="btn-sub">Survey the Ashen Reaches</span>
+      </button>
+
+      <button class="action-btn" style="margin-top:8px;">
+        <span class="btn-title">The Record</span>
+        <span class="btn-sub">Your history in full</span>
+      </button>
+    </div>
+
+  </div>
+
+  <div class="streak-band">
+    <div class="streak-item">
+      <span class="streak-label">Training Streak</span>
+      <span class="streak-number" id="streak-training">0 <span>Days</span></span>
+    </div>
+    <div class="streak-item">
+      <span class="streak-label">Resolve Streak</span>
+      <span class="streak-number" id="streak-resolve">0 <span>Days</span></span>
+    </div>
+    <div class="streak-item">
+      <span class="streak-label">Restoration Streak</span>
+      <span class="streak-number" id="streak-restoration">0 <span>Weeks</span></span>
+    </div>
+  </div>
+
+</div>
+
+
+<script>
+  /* ════════════════════════════════════════════════════════════
+     STORAGE
+  ════════════════════════════════════════════════════════════ */
+  const STORAGE_KEY = 'ashenReaches_v1';
+
+  function loadData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch(e) { return null; }
+  }
+
+  function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     SETUP STATE
+  ════════════════════════════════════════════════════════════ */
+  const setupData = { name:'', origin:'', vow:'', distance:'km', weight:'kg', baseline:{hang:0,pushups:0,run:0} };
+  let currentScreen = 0;
+
+  /* Character counters */
+  document.getElementById('input-origin').addEventListener('input', function() {
+    const c = document.getElementById('count-origin');
+    c.textContent = this.value.length + ' / 100';
+    c.classList.toggle('warn', this.value.length > 85);
+  });
+
+  document.getElementById('input-vow').addEventListener('input', function() {
+    const c = document.getElementById('count-vow');
+    c.textContent = this.value.length + ' / 100';
+    c.classList.toggle('warn', this.value.length > 85);
+  });
+
+  /* Enter key advances screens */
+  document.querySelectorAll('.setup-input, .setup-number').forEach(function(el) {
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        const btn = document.querySelector('#screen-' + currentScreen + ' .nav-forward');
+        if (btn) btn.click();
+      }
+    });
+  });
+
+  /* Progress dots */
+  function updateDots(active) {
+    for (let i = 0; i < 5; i++) {
+      const d = document.getElementById('dot-' + i);
+      d.classList.remove('active','done');
+      if (i < active)       d.classList.add('done');
+      else if (i === active) d.classList.add('active');
+    }
+  }
+
+  /* Forward */
+  function goNext(idx) {
+    if (idx === 0) {
+      const v = document.getElementById('input-name').value.trim();
+      if (!v) { showErr('err-name','input-name'); return; }
+      setupData.name = v;
+      hideErr('err-name','input-name');
+    }
+    if (idx === 1) {
+      const v = document.getElementById('input-origin').value.trim();
+      if (!v) { showErr('err-origin','input-origin'); return; }
+      setupData.origin = v;
+      hideErr('err-origin','input-origin');
+    }
+    if (idx === 2) {
+      const v = document.getElementById('input-vow').value.trim();
+      if (!v) { showErr('err-vow','input-vow'); return; }
+      setupData.vow = v;
+      hideErr('err-vow','input-vow');
+    }
+
+    document.getElementById('screen-' + idx).classList.remove('active');
+    currentScreen = idx + 1;
+    document.getElementById('screen-' + currentScreen).classList.add('active');
+    updateDots(currentScreen);
+
+    if (currentScreen === 4) {
+      document.getElementById('baseline-run-unit').textContent = setupData.distance;
+    }
+  }
+
+  /* Back */
+  function goBack(idx) {
+    document.getElementById('screen-' + idx).classList.remove('active');
+    currentScreen = idx - 1;
+    document.getElementById('screen-' + currentScreen).classList.add('active');
+    updateDots(currentScreen);
+  }
+
+  /* Unit choice */
+  function selectChoice(btn) {
+    const group = btn.getAttribute('data-group');
+    document.querySelectorAll('[data-group="' + group + '"]').forEach(function(b) { b.classList.remove('selected'); });
+    btn.classList.add('selected');
+    setupData[group] = btn.getAttribute('data-value');
+  }
+
+  /* Skip baseline */
+  function skipBaseline() {
+    setupData.baseline = { hang:0, pushups:0, run:0 };
+    completeSetup();
+  }
+
+  /* Complete setup */
+  function completeSetup() {
+    setupData.baseline = {
+      hang:    parseFloat(document.getElementById('baseline-hang').value)    || 0,
+      pushups: parseFloat(document.getElementById('baseline-pushups').value) || 0,
+      run:     parseFloat(document.getElementById('baseline-run').value)     || 0
+    };
+
+    const gameData = {
+      setupComplete: true,
+      createdAt: new Date().toISOString(),
+      warrior: {
+        name:     setupData.name,
+        origin:   setupData.origin,
+        vow:      setupData.vow,
+        distance: setupData.distance,
+        weight:   setupData.weight
+      },
+      baseline: setupData.baseline,
+      stats: { endurance:0, iron:0, force:0, core:0, resolve:0, lore:0 },
+      character: { level:1, xp:0, hp:50, maxHp:50, mana:0, maxMana:33 },
+      streaks: {
+        training:0, resolve:0, restoration:0,
+        lastTrainingDate:null, lastResolveDate:null, lastRestorationWeek:null
+      },
+      log: []
+    };
+
+    saveData(gameData);
+
+    const overlay = document.getElementById('setupOverlay');
+    overlay.classList.add('hidden');
+    setTimeout(function() {
+      overlay.style.display = 'none';
+      populateHomeScreen(gameData);
+    }, 600);
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     HOME SCREEN POPULATION
+  ════════════════════════════════════════════════════════════ */
+  function populateHomeScreen(data) {
+    /* Name and origin */
+    document.getElementById('display-name').textContent   = data.warrior.name;
+    document.getElementById('display-origin').textContent = data.warrior.origin;
+
+    /* Stats */
+    var stats = data.stats;
+    ['endurance','iron','force','core','resolve','lore'].forEach(function(s) {
+      var val = stats[s] || 0;
+      document.getElementById('val-' + s).textContent         = val;
+      document.getElementById('bar-' + s).style.width         = val + '%';
+    });
+
+    /* Readiness — Sprint race weights */
+    var r = Math.round(
+      stats.endurance * 0.25 +
+      stats.iron      * 0.15 +
+      stats.force     * 0.20 +
+      stats.core      * 0.15 +
+      stats.resolve   * 0.15 +
+      stats.lore      * 0.10
+    );
+    document.getElementById('readiness-score').textContent   = r;
+    document.getElementById('readiness-bar').style.width     = r + '%';
+
+    /* Mana pips */
+    var pipContainer = document.getElementById('manaPips');
+    pipContainer.innerHTML = '';
+    var maxMana  = data.character.maxMana;
+    var currMana = data.character.mana;
+    document.getElementById('mana-display').textContent = currMana + ' / ' + maxMana;
+    for (var i = 0; i < maxMana; i++) {
+      var pip = document.createElement('div');
+      pip.className = 'mana-pip' + (i < currMana ? ' filled' : '');
+      pipContainer.appendChild(pip);
+    }
+
+    /* Streaks */
+    document.getElementById('streak-training').innerHTML    = data.streaks.training    + ' <span>Days</span>';
+    document.getElementById('streak-resolve').innerHTML     = data.streaks.resolve     + ' <span>Days</span>';
+    document.getElementById('streak-restoration').innerHTML = data.streaks.restoration + ' <span>Weeks</span>';
+
+    /* Race countdown */
+    var raceDate = new Date('2025-05-23');
+    var today    = new Date(); today.setHours(0,0,0,0);
+    var diff     = Math.ceil((raceDate - today) / 86400000);
+    var el       = document.getElementById('daysUntil');
+    if (diff > 0)       el.innerHTML = diff + ' <span>Days</span>';
+    else if (diff === 0){ el.innerHTML = 'Today <span>— The Gate Opens</span>'; el.style.color = 'var(--ember)'; }
+    else                { el.innerHTML = 'Complete <span>— Battle Available</span>'; el.style.color = 'var(--ironstone)'; }
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     HELPERS
+  ════════════════════════════════════════════════════════════ */
+  function showErr(errId, inputId) {
+    document.getElementById(errId).classList.add('visible');
+    document.getElementById(inputId).classList.add('error');
+    document.getElementById(inputId).focus();
+  }
+
+  function hideErr(errId, inputId) {
+    document.getElementById(errId).classList.remove('visible');
+    document.getElementById(inputId).classList.remove('error');
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     INIT
+  ════════════════════════════════════════════════════════════ */
+  (function init() {
+    var data = loadData();
+    if (data && data.setupComplete) {
+      document.getElementById('setupOverlay').style.display = 'none';
+      populateHomeScreen(data);
+    }
+    /* else: setup overlay is already visible by default */
+  })();
+
+</script>
+</body>
+</html>
