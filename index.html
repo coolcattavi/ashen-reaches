@@ -660,6 +660,518 @@
     .streak-number { font-size: 1.1rem; font-weight: 600; color: var(--bone); line-height: 1; }
     .streak-number span { font-size: 0.6rem; font-weight: 400; color: var(--ironstone); margin-left: 2px; }
 
+    /* ════════════════════════════════════════════════════════════
+       LOGGING SCREEN OVERLAY
+    ════════════════════════════════════════════════════════════ */
+    #logOverlay {
+      position: fixed; inset: 0;
+      background: var(--ash);
+      z-index: 400;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #logOverlay.visible { display: flex; }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 28px;
+      background: #131110;
+      border-bottom: 1px solid var(--ironstone-dim);
+      flex-shrink: 0;
+    }
+
+    .log-header-left { display: flex; flex-direction: column; gap: 3px; }
+
+    .log-header-title {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.25rem;
+      color: var(--parchment);
+      line-height: 1;
+    }
+
+    .log-header-date {
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+    }
+
+    .log-session-type {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .log-session-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+    }
+
+    .log-session-select {
+      background: var(--ash-mid);
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      padding: 6px 10px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .log-session-select:focus { border-color: var(--ironstone); }
+
+    .log-close-btn {
+      background: none;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--ironstone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .log-close-btn:hover { border-color: var(--ironstone); color: var(--bone); }
+
+    .log-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 28px 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--ironstone-dim) transparent;
+    }
+
+    .log-body::-webkit-scrollbar { width: 4px; }
+    .log-body::-webkit-scrollbar-track { background: transparent; }
+    .log-body::-webkit-scrollbar-thumb { background: var(--ironstone-dim); border-radius: 2px; }
+
+    .log-section {
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    .log-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      cursor: pointer;
+      background: #1e1b18;
+      transition: background 0.15s;
+      user-select: none;
+    }
+
+    .log-section-header:hover { background: #252118; }
+    .log-section-header.open { background: #252118; border-bottom: 1px solid var(--ironstone-dim); }
+
+    .log-section-title-group { display: flex; align-items: center; gap: 12px; }
+
+    .log-section-name {
+      font-size: 0.68rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--bone);
+      font-weight: 600;
+    }
+
+    .log-section-world {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.78rem;
+      color: var(--ironstone);
+    }
+
+    .log-section-stat { display: flex; align-items: center; gap: 8px; }
+
+    .log-stat-chip {
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      color: var(--ironstone);
+      padding: 2px 7px;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 10px;
+    }
+
+    .log-chevron {
+      font-size: 0.6rem;
+      color: var(--ironstone);
+      transition: transform 0.2s;
+    }
+
+    .log-section-header.open .log-chevron { transform: rotate(180deg); }
+
+    .log-section-body {
+      display: none;
+      padding: 16px;
+      background: #1a1714;
+    }
+
+    .log-section-body.open { display: block; }
+
+    .log-activity { margin-bottom: 18px; }
+    .log-activity:last-child { margin-bottom: 0; }
+
+    .log-activity-title {
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--ironstone-dim);
+    }
+
+    .log-field-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .log-field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 80px;
+    }
+
+    .log-field-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+    }
+
+    .log-input {
+      width: 100%;
+      background: var(--ash-mid);
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      padding: 8px 10px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+
+    .log-input::-webkit-outer-spin-button,
+    .log-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .log-input:focus { border-color: var(--ironstone); }
+
+    .log-input-unit {
+      font-size: 0.6rem;
+      color: var(--ironstone);
+      letter-spacing: 0.15em;
+      white-space: nowrap;
+      align-self: flex-end;
+      padding-bottom: 9px;
+    }
+
+    .log-select {
+      background: var(--ash-mid);
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      padding: 8px 10px;
+      outline: none;
+      flex: 1;
+    }
+
+    .log-select:focus { border-color: var(--ironstone); }
+
+    .log-target {
+      font-size: 0.6rem;
+      color: var(--ironstone);
+      letter-spacing: 0.15em;
+      margin-top: 3px;
+    }
+
+    .log-target.hit { color: var(--ember); }
+
+    .set-rows { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+
+    .set-row { display: flex; align-items: center; gap: 8px; }
+
+    .set-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--ironstone);
+      width: 44px;
+      flex-shrink: 0;
+    }
+
+    .set-input {
+      width: 80px;
+      background: var(--ash-mid);
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      padding: 7px 10px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+
+    .set-input::-webkit-outer-spin-button,
+    .set-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .set-input:focus { border-color: var(--ironstone); }
+
+    .set-unit { font-size: 0.6rem; color: var(--ironstone); letter-spacing: 0.1em; }
+
+    .set-remove {
+      background: none; border: none;
+      color: var(--ironstone-dim); font-size: 0.75rem;
+      cursor: pointer; padding: 4px; line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .set-remove:hover { color: var(--error); }
+
+    .add-set-btn {
+      background: none;
+      border: 1px dashed var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--ironstone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      width: 100%;
+      text-align: center;
+    }
+
+    .add-set-btn:hover { border-color: var(--ironstone); color: var(--bone); }
+
+    .log-checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .log-checkbox {
+      width: 16px; height: 16px;
+      background: var(--ash-mid);
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      position: relative;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .log-checkbox:checked {
+      background: var(--ember);
+      border-color: var(--ember);
+    }
+
+    .log-checkbox:checked::after {
+      content: '✓';
+      position: absolute; top: -1px; left: 2px;
+      font-size: 0.7rem; color: #fff; font-weight: 700;
+    }
+
+    .log-checkbox-label {
+      font-size: 0.72rem;
+      color: var(--bone);
+      cursor: pointer;
+      letter-spacing: 0.05em;
+    }
+
+    .spartan-confirm {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(196,92,26,0.05);
+      border: 1px solid rgba(196,92,26,0.2);
+      border-radius: 2px;
+      margin-top: 8px;
+    }
+
+    .spartan-confirm .log-checkbox-label {
+      font-size: 0.65rem;
+      color: var(--ironstone);
+      line-height: 1.5;
+    }
+
+    .log-footer {
+      padding: 16px 28px;
+      background: #131110;
+      border-top: 1px solid var(--ironstone-dim);
+      display: flex;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+
+    .commit-btn {
+      padding: 13px 36px;
+      background: linear-gradient(135deg, var(--leather-edge), var(--leather-dark));
+      border: 1px solid rgba(196,92,26,0.4);
+      border-radius: 2px;
+      color: var(--ember);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .commit-btn::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0; width: 2px;
+      background: var(--ember);
+    }
+
+    .commit-btn:hover {
+      background: linear-gradient(135deg, #382818, #1e1208);
+      border-color: rgba(196,92,26,0.7);
+      box-shadow: 0 0 20px rgba(196,92,26,0.2);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       STAT SUMMARY SCREEN
+    ════════════════════════════════════════════════════════════ */
+    #summaryOverlay {
+      position: fixed; inset: 0;
+      background: var(--ash);
+      z-index: 450;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #summaryOverlay.visible { display: flex; }
+
+    .summary-shell {
+      width: 100%;
+      max-width: 560px;
+      padding: 0 24px;
+    }
+
+    .summary-heading {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.8rem;
+      color: var(--parchment);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .summary-date {
+      text-align: center;
+      font-size: 0.6rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      margin-bottom: 32px;
+    }
+
+    .summary-divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--ironstone-dim), transparent);
+      margin-bottom: 28px;
+    }
+
+    .summary-stats { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+
+    .summary-stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: #1e1b18;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+    }
+
+    .summary-stat-name {
+      font-size: 0.62rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+    }
+
+    .summary-stat-change { display: flex; align-items: center; gap: 14px; }
+
+    .summary-old { font-size: 0.85rem; color: var(--ironstone); }
+    .summary-arrow { font-size: 0.7rem; color: var(--ironstone-dim); }
+    .summary-new { font-size: 1rem; font-weight: 600; color: var(--bone); }
+
+    .summary-delta {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--ember);
+      min-width: 40px;
+      text-align: right;
+    }
+
+    .summary-flavour {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.95rem;
+      color: var(--ironstone);
+      text-align: center;
+      line-height: 1.7;
+      margin-bottom: 32px;
+      padding: 0 16px;
+    }
+
+    .summary-return-btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--leather-edge), var(--leather-dark));
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .summary-return-btn:hover {
+      border-color: rgba(196,92,26,0.5);
+      background: linear-gradient(135deg, #382818, #1e1208);
+    }
+
+
   </style>
 </head>
 <body>
@@ -837,6 +1349,438 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     LOGGING SCREEN OVERLAY
+══════════════════════════════════════════════════════════════ -->
+<div id="logOverlay">
+
+  <!-- Header -->
+  <div class="log-header">
+    <div class="log-header-left">
+      <div class="log-header-title">Today's Reckoning</div>
+      <div class="log-header-date" id="log-date-display">—</div>
+    </div>
+    <div class="log-session-type">
+      <span class="log-session-label">Session Type</span>
+      <select class="log-session-select" id="sessionType">
+        <option value="strength">Strength</option>
+        <option value="endurance">Endurance</option>
+        <option value="power">Power</option>
+        <option value="restoration">Restoration</option>
+        <option value="mixed">Mixed</option>
+      </select>
+    </div>
+    <button class="log-close-btn" onclick="closeLog()">✕ Close</button>
+  </div>
+
+  <!-- Scrollable sections -->
+  <div class="log-body">
+
+    <!-- ── ENDURANCE ──────────────────────────────────────── -->
+    <div class="log-section">
+      <div class="log-section-header" onclick="toggleSection(this)">
+        <div class="log-section-title-group">
+          <span class="log-section-name">Endurance</span>
+          <span class="log-section-world">The Long Road</span>
+        </div>
+        <div class="log-section-stat">
+          <span class="log-stat-chip" id="chip-endurance">0</span>
+          <span class="log-chevron">▼</span>
+        </div>
+      </div>
+      <div class="log-section-body">
+
+        <div class="log-activity">
+          <div class="log-activity-title">Running</div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Distance</label>
+              <input type="number" class="log-input" id="run-distance" min="0" step="0.1" placeholder="0">
+            </div>
+            <span class="log-input-unit" id="run-dist-unit">km</span>
+            <div class="log-field-group">
+              <label class="log-field-label">Time (min)</label>
+              <input type="number" class="log-input" id="run-min" min="0" max="999" placeholder="0">
+            </div>
+            <div class="log-field-group">
+              <label class="log-field-label">Time (sec)</label>
+              <input type="number" class="log-input" id="run-sec" min="0" max="59" placeholder="0">
+            </div>
+          </div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Run Type</label>
+              <select class="log-select" id="run-type">
+                <option value="">— Select —</option>
+                <option value="easy">Easy</option>
+                <option value="tempo">Tempo</option>
+                <option value="race_sim">Race Simulation</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Stationary Bike</div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Duration</label>
+              <input type="number" class="log-input" id="bike-duration" min="0" placeholder="0">
+            </div>
+            <span class="log-input-unit">min</span>
+            <div class="log-field-group">
+              <label class="log-field-label">Resistance Level</label>
+              <input type="number" class="log-input" id="bike-resistance" min="0" max="30" placeholder="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Burpees</div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Total Burpees</label>
+              <input type="number" class="log-input" id="burpees-total" min="0" placeholder="0">
+            </div>
+          </div>
+          <div class="spartan-confirm">
+            <input type="checkbox" class="log-checkbox" id="burpees-spartan">
+            <label class="log-checkbox-label" for="burpees-spartan">
+              Spartan standard confirmed — chest to floor, full jump on each rep. <em>(Unchecked = 50% stat value.)</em>
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── IRON ───────────────────────────────────────────── -->
+    <div class="log-section">
+      <div class="log-section-header" onclick="toggleSection(this)">
+        <div class="log-section-title-group">
+          <span class="log-section-name">Iron</span>
+          <span class="log-section-world">The Iron Hand</span>
+        </div>
+        <div class="log-section-stat">
+          <span class="log-stat-chip" id="chip-iron">0</span>
+          <span class="log-chevron">▼</span>
+        </div>
+      </div>
+      <div class="log-section-body">
+
+        <div class="log-activity">
+          <div class="log-activity-title">Hang Time</div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Best Hang (session)</label>
+              <input type="number" class="log-input" id="hang-best" min="0" placeholder="0">
+            </div>
+            <span class="log-input-unit">sec</span>
+            <div class="log-field-group">
+              <label class="log-field-label">Attempts</label>
+              <input type="number" class="log-input" id="hang-attempts" min="0" placeholder="0">
+            </div>
+          </div>
+          <div class="log-target" id="target-hang">Target: — sec</div>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Pull-ups</div>
+          <div class="set-rows" id="pullup-sets"></div>
+          <button class="add-set-btn" onclick="addSet('pullup-sets','pullup','reps')">+ Add Set</button>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Farmer Carries</div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Duration</label>
+              <input type="number" class="log-input" id="carry-duration" min="0" placeholder="0">
+            </div>
+            <span class="log-input-unit">min</span>
+            <div class="log-field-group">
+              <label class="log-field-label">Weight per hand</label>
+              <input type="number" class="log-input" id="carry-weight" min="0" step="0.5" placeholder="0">
+            </div>
+            <span class="log-input-unit" id="carry-weight-unit">kg</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── FORCE ──────────────────────────────────────────── -->
+    <div class="log-section">
+      <div class="log-section-header" onclick="toggleSection(this)">
+        <div class="log-section-title-group">
+          <span class="log-section-name">Force</span>
+          <span class="log-section-world">The Bearing</span>
+        </div>
+        <div class="log-section-stat">
+          <span class="log-stat-chip" id="chip-force">0</span>
+          <span class="log-chevron">▼</span>
+        </div>
+      </div>
+      <div class="log-section-body">
+
+        <div class="log-activity">
+          <div class="log-activity-title">Push-ups</div>
+          <div class="set-rows" id="pushup-sets"></div>
+          <button class="add-set-btn" onclick="addSet('pushup-sets','pushup','reps')">+ Add Set</button>
+          <div class="log-target" id="target-pushups">Target: — reps</div>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Goblet Squats <span style="color:var(--ironstone);font-size:0.6rem;letter-spacing:0.1em;"> — 25 lb fixed</span></div>
+          <div class="set-rows" id="goblet-sets"></div>
+          <button class="add-set-btn" onclick="addSet('goblet-sets','goblet','reps')">+ Add Set</button>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Bodyweight Squats</div>
+          <div class="set-rows" id="squat-sets"></div>
+          <button class="add-set-btn" onclick="addSet('squat-sets','squat','reps')">+ Add Set</button>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Step-ups</div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Total Reps (both legs)</label>
+              <input type="number" class="log-input" id="stepup-reps" min="0" placeholder="0">
+            </div>
+            <div class="log-field-group">
+              <label class="log-field-label">Step Height</label>
+              <select class="log-select" id="stepup-height">
+                <option value="">— Select —</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Resistance Band Work</div>
+          <div class="log-checkbox-row">
+            <input type="checkbox" class="log-checkbox" id="band-completed">
+            <label class="log-checkbox-label" for="band-completed">Completed resistance band work this session</label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── CORE ───────────────────────────────────────────── -->
+    <div class="log-section">
+      <div class="log-section-header" onclick="toggleSection(this)">
+        <div class="log-section-title-group">
+          <span class="log-section-name">Core</span>
+          <span class="log-section-world">The Foundation</span>
+        </div>
+        <div class="log-section-stat">
+          <span class="log-stat-chip" id="chip-core">0</span>
+          <span class="log-chevron">▼</span>
+        </div>
+      </div>
+      <div class="log-section-body">
+
+        <div class="log-activity">
+          <div class="log-activity-title">Plank</div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Best Hold (session)</label>
+              <input type="number" class="log-input" id="plank-best" min="0" placeholder="0">
+            </div>
+            <span class="log-input-unit">sec</span>
+            <div class="log-field-group">
+              <label class="log-field-label">Attempts</label>
+              <input type="number" class="log-input" id="plank-attempts" min="0" placeholder="0">
+            </div>
+          </div>
+          <div class="log-target" id="target-plank">Target: — sec</div>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Hollow Body Hold</div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Best Hold</label>
+              <input type="number" class="log-input" id="hollow-best" min="0" placeholder="0">
+            </div>
+            <span class="log-input-unit">sec</span>
+          </div>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Dead Bugs</div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Total Reps</label>
+              <input type="number" class="log-input" id="deadbug-reps" min="0" placeholder="0">
+            </div>
+            <span class="log-input-unit">reps</span>
+          </div>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Bear Crawls</div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Duration</label>
+              <input type="number" class="log-input" id="bearcrawl-sec" min="0" placeholder="0">
+            </div>
+            <span class="log-input-unit">sec</span>
+            <div class="log-field-group">
+              <label class="log-field-label">— OR — Distance</label>
+              <input type="number" class="log-input" id="bearcrawl-m" min="0" placeholder="0">
+            </div>
+            <span class="log-input-unit">m</span>
+          </div>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Additional Core Work</div>
+          <div class="log-checkbox-row">
+            <input type="checkbox" class="log-checkbox" id="core-additional">
+            <label class="log-checkbox-label" for="core-additional">Completed additional core work not listed above</label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── POWER ──────────────────────────────────────────── -->
+    <div class="log-section">
+      <div class="log-section-header" onclick="toggleSection(this)">
+        <div class="log-section-title-group">
+          <span class="log-section-name">Power</span>
+          <span class="log-section-world">Endurance + Force</span>
+        </div>
+        <div class="log-section-stat">
+          <span class="log-stat-chip" id="chip-power">Phase <span id="power-phase-label">1</span></span>
+          <span class="log-chevron">▼</span>
+        </div>
+      </div>
+      <div class="log-section-body">
+
+        <div class="log-activity">
+          <div class="log-activity-title">Plyometrics / Foot Contacts</div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Total Foot Contacts</label>
+              <input type="number" class="log-input" id="power-contacts" min="0" placeholder="0">
+            </div>
+            <span class="log-input-unit">contacts</span>
+          </div>
+        </div>
+
+        <div class="log-activity" id="power-sprint-section" style="display:none;">
+          <div class="log-activity-title">Sprint Intervals <span style="color:var(--ironstone);font-size:0.6rem;"> — Phase 3 only</span></div>
+          <div class="log-field-row">
+            <div class="log-field-group">
+              <label class="log-field-label">Intervals</label>
+              <input type="number" class="log-input" id="sprint-intervals" min="0" placeholder="0">
+            </div>
+            <div class="log-field-group">
+              <label class="log-field-label">Work (sec)</label>
+              <input type="number" class="log-input" id="sprint-work" min="0" placeholder="0">
+            </div>
+            <div class="log-field-group">
+              <label class="log-field-label">Rest (sec)</label>
+              <input type="number" class="log-input" id="sprint-rest" min="0" placeholder="0">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── RESOLVE ────────────────────────────────────────── -->
+    <div class="log-section">
+      <div class="log-section-header" onclick="toggleSection(this)">
+        <div class="log-section-title-group">
+          <span class="log-section-name">Resolve</span>
+          <span class="log-section-world">The Source</span>
+        </div>
+        <div class="log-section-stat">
+          <span class="log-stat-chip" id="chip-resolve">0</span>
+          <span class="log-chevron">▼</span>
+        </div>
+      </div>
+      <div class="log-section-body">
+
+        <div class="log-activity">
+          <div class="log-activity-title">Prayer</div>
+          <div class="log-checkbox-row">
+            <input type="checkbox" class="log-checkbox" id="prayer-done">
+            <label class="log-checkbox-label" for="prayer-done">Prayer completed today</label>
+          </div>
+          <div class="log-field-row" style="margin-top:6px;">
+            <div class="log-field-group" style="max-width:120px;">
+              <label class="log-field-label">Duration (optional)</label>
+              <input type="number" class="log-input" id="prayer-duration" min="0" placeholder="0">
+            </div>
+            <span class="log-input-unit">min</span>
+          </div>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Journaling</div>
+          <div class="log-checkbox-row">
+            <input type="checkbox" class="log-checkbox" id="journal-done">
+            <label class="log-checkbox-label" for="journal-done">Journaling completed today</label>
+          </div>
+        </div>
+
+        <div class="log-activity">
+          <div class="log-activity-title">Reading</div>
+          <div class="log-checkbox-row">
+            <input type="checkbox" class="log-checkbox" id="reading-done">
+            <label class="log-checkbox-label" for="reading-done">Reading completed today</label>
+          </div>
+          <div class="log-field-row" style="margin-top:6px;">
+            <div class="log-field-group" style="max-width:120px;">
+              <label class="log-field-label">Pages read (optional)</label>
+              <input type="number" class="log-input" id="reading-pages" min="0" placeholder="0">
+            </div>
+            <span class="log-input-unit">pages</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- spacer so last section isn't flush against footer -->
+    <div style="height: 12px;"></div>
+
+  </div><!-- /log-body -->
+
+  <!-- Commit footer -->
+  <div class="log-footer">
+    <button class="commit-btn" onclick="commitLog()">Commit</button>
+  </div>
+
+</div><!-- /logOverlay -->
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     STAT SUMMARY SCREEN
+══════════════════════════════════════════════════════════════ -->
+<div id="summaryOverlay">
+  <div class="summary-shell">
+    <div class="summary-heading">Today's reckoning.</div>
+    <div class="summary-date" id="summary-date-display">—</div>
+    <div class="summary-divider"></div>
+    <div class="summary-stats" id="summary-stats-list"></div>
+    <div class="summary-flavour" id="summary-flavour-text">—</div>
+    <button class="summary-return-btn" onclick="closeSummary()">Return</button>
   </div>
 </div>
 
@@ -1243,6 +2187,396 @@
     }
     /* else: setup overlay is already visible by default */
   })();
+
+  /* ════════════════════════════════════════════════════════════
+     PHASE 3 — LOGGING SCREEN
+  ════════════════════════════════════════════════════════════ */
+
+  /* ── Flavour text banks ─────────────────────────────────── */
+  var FLAVOUR = {
+    strength:    ["The weight does not care about your reasons. You moved it anyway.",
+                  "Strength is not built in the moment you lift. It is built in the moment you chose to.",
+                  "The body remembers what the mind forgets. You gave it something to remember.",
+                  "Nothing about today was certain. You made it certain anyway.",
+                  "You are not stronger today than yesterday. You are less weak.",
+                  "The bar does not move itself. Neither does anything worth having.",
+                  "Hard work in the dark builds the same muscle as hard work in the light.",
+                  "The Reaches demand more than intention. Today you delivered."],
+    endurance:   ["The road remembers every foot that crossed it. So does yours.",
+                  "Distance is just time made visible. You spent it well.",
+                  "Lungs that burned today will not burn the same way next time.",
+                  "You did not stop. That is all the Reaches asked of you.",
+                  "Running teaches the body one thing above all: that it can.",
+                  "What you built today cannot be taken from you. Only neglected.",
+                  "Endurance is not the absence of pain. It is the decision to continue through it.",
+                  "The distance behind you is the only argument that matters."],
+    power:       ["Something changed in the way you land. The ground noticed.",
+                  "Explosiveness is controlled violence. You are learning the control.",
+                  "The first jump is faith. Every jump after that is evidence.",
+                  "Power is not just force. It is force arriving precisely.",
+                  "The hills of the Reaches do not yield. Neither, today, did you.",
+                  "Speed is built in fragments. Each fragment matters.",
+                  "You are teaching your body to fall correctly. That is harder than it sounds.",
+                  "The sprint ends. The capacity to sprint again is what you are building."],
+    restoration: ["A warrior who cannot rest cannot fight. You rested.",
+                  "Maintenance is not weakness. The blade that is never sharpened does not cut.",
+                  "What you preserved today, you will need in October.",
+                  "The Reaches are patient. They will still be here after you have healed.",
+                  "Stillness is not absence. It is preparation wearing different clothes.",
+                  "You gave the body what it asked for. It will remember.",
+                  "Recovery is training. Slow down enough to believe that.",
+                  "The quiet day builds the same character as the hard one. It just does it differently."],
+    mixed:       ["Not every day gives everything. This one gave what it gave.",
+                  "Variety is honest. You trained what needed training.",
+                  "The Reaches do not require perfection. Only presence.",
+                  "Different demands. Same answer: you showed up.",
+                  "A mixed day is still a day that happened. It counts.",
+                  "Not your best session. Not your last, either.",
+                  "The work was uneven. It was still work.",
+                  "You came. You did something. That is not nothing."]
+  };
+
+  function randomFlavour(sessionType) {
+    var bank = FLAVOUR[sessionType] || FLAVOUR.mixed;
+    return '"' + bank[Math.floor(Math.random() * bank.length)] + '"';
+  }
+
+  /* ── Determine Power phase by date ─────────────────────── */
+  function getPowerPhase() {
+    var now = new Date();
+    var apr1  = new Date('2025-04-01');
+    var apr21 = new Date('2025-04-21');
+    if (now >= apr21) return 3;
+    if (now >= apr1)  return 2;
+    return 1;
+  }
+
+  /* ── Section toggle ─────────────────────────────────────── */
+  function toggleSection(header) {
+    var body = header.nextElementSibling;
+    var isOpen = header.classList.contains('open');
+    header.classList.toggle('open', !isOpen);
+    body.classList.toggle('open', !isOpen);
+  }
+
+  /* ── Repeating set rows ─────────────────────────────────── */
+  function addSet(containerId, prefix, unit) {
+    var container = document.getElementById(containerId);
+    var count = container.querySelectorAll('.set-row').length;
+    if (count >= 10) return;
+    var idx = count + 1;
+    var row = document.createElement('div');
+    row.className = 'set-row';
+    row.innerHTML =
+      '<span class="set-label">Set ' + idx + '</span>' +
+      '<input type="number" class="set-input" data-set="' + prefix + '" min="0" placeholder="0" style="-moz-appearance:textfield;">' +
+      '<span class="set-unit">' + unit + '</span>' +
+      '<button class="set-remove" onclick="removeSet(this)" title="Remove">✕</button>';
+    container.appendChild(row);
+    renumberSets(container);
+  }
+
+  function removeSet(btn) {
+    var row = btn.closest('.set-row');
+    var container = row.parentElement;
+    row.remove();
+    renumberSets(container);
+  }
+
+  function renumberSets(container) {
+    container.querySelectorAll('.set-row').forEach(function(r, i) {
+      r.querySelector('.set-label').textContent = 'Set ' + (i + 1);
+    });
+  }
+
+  function getSetValues(containerId) {
+    var vals = [];
+    document.getElementById(containerId).querySelectorAll('.set-input').forEach(function(inp) {
+      var v = parseFloat(inp.value) || 0;
+      if (v > 0) vals.push(v);
+    });
+    return vals;
+  }
+
+  /* ── Open the log screen ────────────────────────────────── */
+  function openLog() {
+    var data = loadData();
+    if (!data) return;
+
+    /* Set date */
+    var now = new Date();
+    var opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+    document.getElementById('log-date-display').textContent = now.toLocaleDateString('en-CA', opts).toUpperCase();
+    document.getElementById('summary-date-display').textContent = now.toLocaleDateString('en-CA', opts).toUpperCase();
+
+    /* Units */
+    var distUnit   = data.warrior.distance || 'km';
+    var weightUnit = data.warrior.weight   || 'kg';
+    document.getElementById('run-dist-unit').textContent    = distUnit;
+    document.getElementById('carry-weight-unit').textContent = weightUnit;
+
+    /* Stat chips — current values */
+    ['endurance','iron','force','core','resolve'].forEach(function(s) {
+      var el = document.getElementById('chip-' + s);
+      if (el) el.textContent = data.stats[s] || 0;
+    });
+
+    /* Targets from baseline */
+    var hangTarget   = (data.baseline.hang    || 0) + 3;
+    var pushTarget   = (data.baseline.pushups || 0) + 2;
+    var plankTarget  = (data.targets && data.targets.plank)  || 30;
+
+    document.getElementById('target-hang').textContent    = 'Target: ' + hangTarget + ' sec';
+    document.getElementById('target-pushups').textContent = 'Target: ' + pushTarget + ' reps';
+    document.getElementById('target-plank').textContent   = 'Target: ' + plankTarget + ' sec';
+
+    /* Power phase */
+    var phase = getPowerPhase();
+    document.getElementById('power-phase-label').textContent = phase;
+    document.getElementById('power-sprint-section').style.display = (phase === 3) ? 'block' : 'none';
+
+    /* Clear all inputs */
+    document.querySelectorAll('#logOverlay input[type=number], #logOverlay input[type=text]').forEach(function(i) { i.value = ''; });
+    document.querySelectorAll('#logOverlay input[type=checkbox]').forEach(function(c) { c.checked = false; });
+    document.querySelectorAll('#logOverlay select').forEach(function(s) { s.selectedIndex = 0; });
+
+    /* Clear dynamic set rows */
+    ['pullup-sets','pushup-sets','goblet-sets','squat-sets'].forEach(function(id) {
+      document.getElementById(id).innerHTML = '';
+    });
+
+    /* Collapse all sections */
+    document.querySelectorAll('.log-section-header.open').forEach(function(h) {
+      h.classList.remove('open');
+      h.nextElementSibling.classList.remove('open');
+    });
+
+    document.getElementById('logOverlay').classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLog() {
+    document.getElementById('logOverlay').classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+
+  /* ── STAT CALCULATION ───────────────────────────────────── */
+  function calcStatDeltas(data) {
+    var baseline = data.baseline || {};
+    var current  = data.stats   || {};
+
+    var deltas = { endurance:0, iron:0, force:0, core:0, resolve:0, lore:0 };
+
+    /* ── ENDURANCE ── */
+    var runDist = parseFloat(document.getElementById('run-distance').value) || 0;
+    var bikeDur = parseFloat(document.getElementById('bike-duration').value) || 0;
+    var bikeRes = parseFloat(document.getElementById('bike-resistance').value) || 0;
+    var burpees = parseFloat(document.getElementById('burpees-total').value) || 0;
+    var spartanOk = document.getElementById('burpees-spartan').checked;
+
+    var endPts = 0;
+    if (runDist > 0) {
+      /* Points: each km = 2 pts, capped at 20 per session */
+      var distUnit = data.warrior.distance || 'km';
+      var km = distUnit === 'miles' ? runDist * 1.609 : runDist;
+      endPts += Math.min(km * 2, 20);
+    }
+    if (bikeDur > 0) endPts += Math.min(bikeDur * 0.1 * (bikeRes > 0 ? bikeRes / 10 + 1 : 1), 5);
+    if (burpees > 0) endPts += Math.min(burpees * (spartanOk ? 0.1 : 0.05), 5);
+    deltas.endurance = parseFloat(Math.min(endPts, 25).toFixed(1));
+
+    /* ── IRON ── */
+    var hangBest = parseFloat(document.getElementById('hang-best').value) || 0;
+    var pullups  = getSetValues('pullup-sets');
+    var totalPullups = pullups.reduce(function(a,b){return a+b;}, 0);
+
+    var ironPts = 0;
+    if (hangBest > 0) ironPts += Math.min(hangBest * 0.15, 8);
+    if (totalPullups > 0) ironPts += Math.min(totalPullups * 0.25, 8);
+    deltas.iron = parseFloat(Math.min(ironPts, 20).toFixed(1));
+
+    /* ── FORCE ── */
+    var pushups  = getSetValues('pushup-sets');
+    var goblets  = getSetValues('goblet-sets');
+    var squats   = getSetValues('squat-sets');
+    var stepReps = parseFloat(document.getElementById('stepup-reps').value) || 0;
+    var bandDone = document.getElementById('band-completed').checked;
+
+    var totalPushups = pushups.reduce(function(a,b){return a+b;}, 0);
+    var totalGoblets = goblets.reduce(function(a,b){return a+b;}, 0);
+    var totalSquats  = squats.reduce(function(a,b){return a+b;}, 0);
+
+    var forcePts = 0;
+    if (totalPushups > 0) forcePts += Math.min(totalPushups * 0.12, 8);
+    if (totalGoblets > 0) forcePts += Math.min(totalGoblets * 0.08, 5);
+    if (totalSquats  > 0) forcePts += Math.min(totalSquats  * 0.05, 4);
+    if (stepReps > 0)     forcePts += Math.min(stepReps * 0.04, 3);
+    if (bandDone)         forcePts += 1;
+    deltas.force = parseFloat(Math.min(forcePts, 20).toFixed(1));
+
+    /* ── CORE ── */
+    var plankBest   = parseFloat(document.getElementById('plank-best').value)    || 0;
+    var hollowBest  = parseFloat(document.getElementById('hollow-best').value)   || 0;
+    var deadbugReps = parseFloat(document.getElementById('deadbug-reps').value)  || 0;
+    var bcSec       = parseFloat(document.getElementById('bearcrawl-sec').value) || 0;
+    var bcM         = parseFloat(document.getElementById('bearcrawl-m').value)   || 0;
+    var coreExtra   = document.getElementById('core-additional').checked;
+
+    var corePts = 0;
+    if (plankBest  > 0) corePts += Math.min(plankBest  * 0.1,  8);
+    if (hollowBest > 0) corePts += Math.min(hollowBest * 0.08, 4);
+    if (deadbugReps> 0) corePts += Math.min(deadbugReps* 0.05, 3);
+    if (bcSec > 0 || bcM > 0) corePts += Math.min((bcSec + bcM * 0.5) * 0.05, 4);
+    if (coreExtra)      corePts += 1;
+    deltas.core = parseFloat(Math.min(corePts, 20).toFixed(1));
+
+    /* ── RESOLVE ── */
+    var prayerDone  = document.getElementById('prayer-done').checked;
+    var prayerMin   = parseFloat(document.getElementById('prayer-duration').value) || 0;
+    var journalDone = document.getElementById('journal-done').checked;
+    var readingDone = document.getElementById('reading-done').checked;
+    var readPages   = parseFloat(document.getElementById('reading-pages').value) || 0;
+
+    var resolvePts = 0;
+    if (prayerDone)  { resolvePts += (prayerMin >= 10) ? 1.5 : 1; }
+    if (journalDone) { resolvePts += 1; }
+    deltas.resolve = parseFloat(Math.min(resolvePts, 3).toFixed(1));
+
+    /* ── LORE ── */
+    var lorePts = 0;
+    if (readingDone) { lorePts += (readPages >= 20) ? 1.5 : 1; }
+    deltas.lore = parseFloat(Math.min(lorePts, 2).toFixed(1));
+
+    /* ── POWER (split equally to Endurance + Force) ── */
+    var contacts = parseFloat(document.getElementById('power-contacts').value) || 0;
+    if (contacts > 0) {
+      var powerBonus = Math.min(contacts * 0.05, 4);
+      deltas.endurance = parseFloat((deltas.endurance + powerBonus / 2).toFixed(1));
+      deltas.force     = parseFloat((deltas.force     + powerBonus / 2).toFixed(1));
+    }
+
+    return deltas;
+  }
+
+  /* ── COMMIT ─────────────────────────────────────────────── */
+  function commitLog() {
+    var data = loadData();
+    if (!data) return;
+
+    var sessionType = document.getElementById('sessionType').value;
+    var deltas = calcStatDeltas(data);
+    var prevStats = {};
+
+    /* Apply deltas, cap at 100 */
+    ['endurance','iron','force','core','resolve','lore'].forEach(function(s) {
+      prevStats[s] = data.stats[s] || 0;
+      data.stats[s] = parseFloat(Math.min(100, prevStats[s] + (deltas[s] || 0)).toFixed(1));
+    });
+
+    /* Mana: prayer +10, journal +5 */
+    var prayerDone  = document.getElementById('prayer-done').checked;
+    var journalDone = document.getElementById('journal-done').checked;
+    var manaGain = (prayerDone ? 10 : 0) + (journalDone ? 5 : 0);
+    data.character.mana = Math.min(data.character.maxMana, (data.character.mana || 0) + manaGain);
+
+    /* Streaks */
+    var todayStr = new Date().toISOString().slice(0,10);
+    var hasPhysical = (deltas.endurance + deltas.iron + deltas.force + deltas.core) > 0;
+    if (hasPhysical) {
+      var last = data.streaks.lastTrainingDate;
+      var yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+      var yStr = yesterday.toISOString().slice(0,10);
+      if (last === yStr || last === todayStr) {
+        if (last !== todayStr) data.streaks.training = (data.streaks.training || 0) + 1;
+      } else {
+        data.streaks.training = 1;
+      }
+      data.streaks.lastTrainingDate = todayStr;
+    }
+
+    var hasResolve = prayerDone && journalDone;
+    if (hasResolve) {
+      var lastR = data.streaks.lastResolveDate;
+      var yesterdayR = new Date(); yesterdayR.setDate(yesterdayR.getDate() - 1);
+      var yStrR = yesterdayR.toISOString().slice(0,10);
+      if (lastR === yStrR || lastR === todayStr) {
+        if (lastR !== todayStr) data.streaks.resolve = (data.streaks.resolve || 0) + 1;
+      } else {
+        data.streaks.resolve = 1;
+      }
+      data.streaks.lastResolveDate = todayStr;
+    }
+
+    /* Log entry */
+    var logEntry = {
+      date: todayStr,
+      sessionType: sessionType,
+      deltas: deltas,
+      manaGain: manaGain
+    };
+    data.log.push(logEntry);
+
+    saveData(data);
+
+    /* Show summary */
+    closeLog();
+    showSummary(prevStats, data.stats, deltas, sessionType);
+    populateHomeScreen(data);
+  }
+
+  /* ── SUMMARY SCREEN ─────────────────────────────────────── */
+  function showSummary(prevStats, newStats, deltas, sessionType) {
+    var list = document.getElementById('summary-stats-list');
+    list.innerHTML = '';
+
+    var statLabels = {
+      endurance: 'Endurance', iron: 'Iron', force: 'Force',
+      core: 'Core', resolve: 'Resolve', lore: 'Lore'
+    };
+
+    var anyChange = false;
+    ['endurance','iron','force','core','resolve','lore'].forEach(function(s) {
+      var d = deltas[s] || 0;
+      if (d <= 0) return;
+      anyChange = true;
+      var row = document.createElement('div');
+      row.className = 'summary-stat-row';
+      row.innerHTML =
+        '<span class="summary-stat-name">' + statLabels[s] + '</span>' +
+        '<div class="summary-stat-change">' +
+          '<span class="summary-old">' + prevStats[s].toFixed(1) + '</span>' +
+          '<span class="summary-arrow">→</span>' +
+          '<span class="summary-new">' + newStats[s].toFixed(1) + '</span>' +
+          '<span class="summary-delta">+' + d.toFixed(1) + '</span>' +
+        '</div>';
+      list.appendChild(row);
+    });
+
+    if (!anyChange) {
+      var none = document.createElement('div');
+      none.style.cssText = 'text-align:center;color:var(--ironstone);font-size:0.8rem;padding:20px 0;';
+      none.textContent = 'No stat fields were filled in.';
+      list.appendChild(none);
+    }
+
+    document.getElementById('summary-flavour-text').textContent = randomFlavour(sessionType);
+    document.getElementById('summaryOverlay').classList.add('visible');
+  }
+
+  function closeSummary() {
+    document.getElementById('summaryOverlay').classList.remove('visible');
+  }
+
+  /* ── Wire "Log Training" button on home screen ──────────── */
+  document.addEventListener('DOMContentLoaded', function() {
+    /* The first action button is Log Training */
+    var btns = document.querySelectorAll('.action-btn');
+    if (btns[0]) btns[0].addEventListener('click', function() {
+      var data = loadData();
+      if (data && data.setupComplete) openLog();
+    });
+  });
+
 
 </script>
 </body>
