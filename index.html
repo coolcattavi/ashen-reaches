@@ -1957,6 +1957,282 @@
     }
 
 
+    /* ════════════════════════════════════════════════════════════
+       PHASE 6 — LEVEL UP & ABILITIES TREE
+    ════════════════════════════════════════════════════════════ */
+
+    #levelUpOverlay {
+      position: fixed; inset: 0;
+      background: var(--ash);
+      z-index: 600;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-y: auto;
+      padding: 48px 24px 48px;
+      animation: fadeIn 0.6s ease;
+    }
+
+    #levelUpOverlay.visible { display: flex; }
+
+    /* ── Narrative moment ─────────────────────────────────── */
+    .levelup-shell {
+      width: 100%;
+      max-width: 580px;
+    }
+
+    .levelup-eyebrow {
+      font-size: 0.58rem;
+      letter-spacing: 0.55em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .levelup-number {
+      font-family: 'IM Fell English', serif;
+      font-size: 4rem;
+      color: var(--ember);
+      text-align: center;
+      line-height: 1;
+      margin-bottom: 6px;
+      text-shadow: 0 0 40px rgba(196,92,26,0.3);
+    }
+
+    .levelup-title {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.5rem;
+      color: var(--parchment);
+      text-align: center;
+      margin-bottom: 28px;
+      line-height: 1.2;
+    }
+
+    .levelup-passage {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.92rem;
+      color: var(--ironstone);
+      line-height: 1.85;
+      text-align: center;
+      margin-bottom: 36px;
+      padding: 24px 28px;
+      border-top: 1px solid var(--ironstone-dim);
+      border-bottom: 1px solid var(--ironstone-dim);
+      background:
+        linear-gradient(135deg, #2a2418 25%, transparent 25%) -6px 0,
+        linear-gradient(225deg, #2a2418 25%, transparent 25%) -6px 0,
+        linear-gradient(315deg, #2a2418 25%, transparent 25%),
+        linear-gradient(45deg,  #2a2418 25%, transparent 25%);
+      background-size: 12px 12px;
+      background-color: #231e17;
+    }
+
+    /* ── Abilities tree heading ───────────────────────────── */
+    .abilities-heading {
+      font-size: 0.62rem;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .abilities-subheading {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.82rem;
+      color: var(--ironstone);
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    /* ── Branch block ─────────────────────────────────────── */
+    .abilities-branch {
+      margin-bottom: 14px;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .branch-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      background: #1e1b18;
+      border-bottom: 1px solid var(--ironstone-dim);
+    }
+
+    .branch-name {
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--bone);
+      font-weight: 600;
+    }
+
+    .branch-prereq {
+      font-size: 0.58rem;
+      color: var(--ironstone);
+      letter-spacing: 0.1em;
+    }
+
+    /* ── Individual ability card ──────────────────────────── */
+    .ability-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      background: #1a1714;
+      border-bottom: 1px solid var(--ironstone-dim);
+      transition: background 0.15s;
+      position: relative;
+    }
+
+    .ability-card:last-child { border-bottom: none; }
+
+    .ability-card.unlockable {
+      cursor: pointer;
+    }
+
+    .ability-card.unlockable:hover {
+      background: #222018;
+    }
+
+    .ability-card.already-owned {
+      opacity: 0.5;
+    }
+
+    .ability-card.locked {
+      opacity: 0.4;
+    }
+
+    .ability-card.selected-this-level {
+      background: rgba(196,92,26,0.08);
+      border-left: 2px solid var(--ember);
+    }
+
+    .ability-type-badge {
+      font-size: 0.52rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 10px;
+      border: 1px solid var(--ironstone-dim);
+      color: var(--ironstone);
+      white-space: nowrap;
+      flex-shrink: 0;
+      width: 50px;
+      text-align: center;
+    }
+
+    .ability-type-badge.active  { border-color: rgba(196,92,26,0.4); color: var(--ember); }
+    .ability-type-badge.passive { border-color: rgba(138,132,120,0.4); color: var(--ironstone); }
+
+    .ability-info { flex: 1; }
+
+    .ability-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--bone);
+      margin-bottom: 3px;
+      letter-spacing: 0.05em;
+    }
+
+    .ability-effect {
+      font-size: 0.65rem;
+      color: var(--ironstone);
+      line-height: 1.4;
+      letter-spacing: 0.03em;
+    }
+
+    .ability-cost {
+      font-size: 0.6rem;
+      color: var(--ironstone);
+      letter-spacing: 0.15em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .ability-lock-reason {
+      font-size: 0.58rem;
+      color: var(--ironstone-dim);
+      margin-top: 3px;
+      font-style: italic;
+    }
+
+    .ability-owned-badge {
+      font-size: 0.55rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 10px;
+      padding: 2px 7px;
+      flex-shrink: 0;
+    }
+
+    /* ── Confirm / skip buttons ───────────────────────────── */
+    .levelup-footer {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .levelup-confirm-btn {
+      padding: 13px 40px;
+      background: linear-gradient(135deg, var(--leather-edge), var(--leather-dark));
+      border: 1px solid rgba(196,92,26,0.4);
+      border-radius: 2px;
+      color: var(--ember);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: background 0.2s, border-color 0.2s;
+      display: none; /* shown after a selection is made */
+    }
+
+    .levelup-confirm-btn::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0; width: 2px;
+      background: var(--ember);
+    }
+
+    .levelup-confirm-btn:hover {
+      background: linear-gradient(135deg, #382818, #1e1208);
+      border-color: rgba(196,92,26,0.7);
+    }
+
+    .levelup-confirm-btn.visible { display: block; }
+
+    .levelup-skip-btn {
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--ironstone-dim);
+      background: none; border: none; cursor: pointer; padding: 0;
+      text-decoration: underline; text-underline-offset: 3px;
+      transition: color 0.2s;
+    }
+
+    .levelup-skip-btn:hover { color: var(--ironstone); }
+
+    /* ── Roman numeral level display on home panel ────────── */
+    .level-roman {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.1rem;
+    }
+
+
   </style>
 </head>
 <body>
@@ -2137,6 +2413,38 @@
   </div>
 </div>
 
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     PHASE 6 — LEVEL UP & ABILITIES TREE OVERLAY
+══════════════════════════════════════════════════════════════ -->
+<div id="levelUpOverlay">
+  <div class="levelup-shell">
+
+    <!-- Narrative moment -->
+    <p class="levelup-eyebrow">Level Reached</p>
+    <div class="levelup-number" id="levelup-number">II</div>
+    <div class="levelup-title" id="levelup-title">—</div>
+    <div class="levelup-passage" id="levelup-passage">—</div>
+
+    <!-- Abilities tree -->
+    <div class="abilities-heading">Choose One Ability</div>
+    <div class="abilities-subheading" id="abilities-subheading">Select an ability you have earned the right to carry.</div>
+
+    <div id="abilities-tree-container"></div>
+
+    <!-- Footer -->
+    <div class="levelup-footer">
+      <button class="levelup-confirm-btn" id="levelup-confirm-btn" onclick="confirmAbility()">
+        Carry this forward →
+      </button>
+      <button class="levelup-skip-btn" onclick="skipAbility()">
+        Not yet — I'll return to this
+      </button>
+    </div>
+
+  </div>
+</div>
 
 
 <!-- ══════════════════════════════════════════════════════════════
@@ -4421,6 +4729,10 @@
     var xpNeeded = xpThresholds[Math.min(lvl, xpThresholds.length - 1)];
     var xpCurrent = data.character.xp;
 
+    /* Phase 6: check for level-up BEFORE saving */
+    var didLevelUp = checkLevelUp(data);
+    var newLevel   = data.character.level;
+
     saveData(data);
     populateHomeScreen(data);
 
@@ -4432,10 +4744,17 @@
     document.getElementById('result-icon').textContent    = '⚔️';
     document.getElementById('result-title').textContent   = 'Victory';
     document.getElementById('result-xp').style.display   = 'block';
-    document.getElementById('result-xp').innerHTML       = '+' + xpGain + ' XP <span>earned</span>';
+    document.getElementById('result-xp').innerHTML       = '+' + xpGain + ' XP <span>earned</span>' +
+      (didLevelUp ? ' &nbsp;·&nbsp; <span style="color:var(--ember)">LEVEL UP</span>' : '');
     document.getElementById('result-injury-notice').style.display = 'none';
     document.getElementById('result-passage').textContent = '"' + passage + '"';
     document.getElementById('combatResultOverlay').classList.add('visible');
+
+    /* Phase 6: queue level-up screen to show after result is dismissed */
+    if (didLevelUp) {
+      var _origClose = window._levelUpQueued;
+      window._levelUpQueued = { level: newLevel };
+    }
   }
 
   /* ── Defeat ──────────────────────────────────────────────── */
@@ -4466,6 +4785,14 @@
   /* ── Close result screen ─────────────────────────────────── */
   function closeCombatResult() {
     document.getElementById('combatResultOverlay').classList.remove('visible');
+
+    /* Phase 6: if a level-up was queued, show it now */
+    if (window._levelUpQueued) {
+      var queued = window._levelUpQueued;
+      window._levelUpQueued = null;
+      var data = loadData();
+      if (data) showLevelUp(queued.level, data);
+    }
   }
 
   /* ── Wire Venture Out button ─────────────────────────────── */
@@ -4508,6 +4835,361 @@
     if (xpFill)  xpFill.style.width = pct + '%';
     if (xpLabel) xpLabel.textContent = 'Next Level: ' + (nextXp - curXp) + ' XP required';
     if (xpVal)   xpVal.textContent   = curXp + ' / ' + nextXp + ' XP';
+  };
+
+
+
+  /* ════════════════════════════════════════════════════════════
+     PHASE 6 — LEVEL UP & ABILITIES TREE
+  ════════════════════════════════════════════════════════════ */
+
+  /* ── XP thresholds (index = level needed to reach) ──────── */
+  var XP_THRESHOLDS = [0, 200, 500, 900, 1400, 2000, 2700, 3500, 4400, 5400];
+
+  /* ── Roman numerals ──────────────────────────────────────── */
+  var ROMAN = ['', 'I','II','III','IV','V','VI','VII','VIII','IX','X'];
+
+  /* ── Level-up narrative moments ─────────────────────────── */
+  var LEVELUP_MOMENTS = {
+    2:  { title: 'The Road Opens',
+          passage: 'Two hundred steps behind you. The Reaches have noticed. Not with warmth — with the cold acknowledgement that something capable has entered the territory. You are no longer a stranger here.' },
+    3:  { title: 'Harder Ground',
+          passage: 'The body is different now. Not larger. Not louder. Quieter, in the way that things become quiet when they have learned to do a thing without thinking about it. Something has changed that cannot be undone.' },
+    4:  { title: 'The Weight of It',
+          passage: 'Four levels in and the work has stopped feeling like discipline. It feels like nature. The Reaches have no ceremony for this — they simply stop presenting the easy things and start presenting the hard ones.' },
+    5:  { title: 'Halfway to the Gate',
+          passage: 'You are past the point where most people stop. That is not praise — it is a fact about the road. The Iron Gate is closer now than the day you began. Close enough to see the shape of it.' },
+    6:  { title: 'The Deep Country',
+          passage: 'The hardest things in the Reaches live here. They have seen warriors reach this point before. Most of those warriors eventually turned back. The road ahead requires something different from what got you here.' },
+    7:  { title: 'Earned',
+          passage: 'There is no word in the Reaches for what you have become. They did not build one because they did not expect many people to get here. The work now is to stay here.' },
+    8:  { title: 'The Far Side of the Work',
+          passage: 'Eight levels. The Reaches are different from this side — quieter, stranger, more serious. You have been changed by the distance. You will not be unchanged again.' },
+    9:  { title: 'Almost',
+          passage: 'One level from the end of the numbered road. The October reckoning is close. The body knows what is coming. So does the road.' },
+    10: { title: 'The Long Road Walked',
+          passage: 'You have reached the end of the numbered levels. The Reaches do not offer celebration for this. They offer continuation — deeper country, harder things, the same cold road forward.' }
+  };
+
+  /* ── Full abilities definition ───────────────────────────── */
+  var ABILITIES = [
+    /* Branch 1 — Iron */
+    { id:'iron_grip',       branch:'iron',       name:'Iron Grip',
+      type:'passive', levelReq:2, statReq:{iron:20},
+      cost:0,  costLabel:'Passive',
+      effect:'Reduces all incoming damage by 5%.',
+      combatEffect:'damage_reduction_pct', value:0.05 },
+    { id:'hanging_strike',  branch:'iron',       name:'The Hanging Strike',
+      type:'active',  levelReq:4, statReq:{iron:40},
+      cost:8,  costLabel:'8 Mana',
+      effect:'Deals 150% normal Strike damage.',
+      combatEffect:'strike_multiplier', value:1.5 },
+    { id:'ironclad',        branch:'iron',       name:'Ironclad',
+      type:'passive', levelReq:7, statReq:{iron:60},
+      cost:0,  costLabel:'Passive',
+      effect:'Immune to one enemy special attack per encounter.',
+      combatEffect:'special_immunity', value:1 },
+
+    /* Branch 2 — Force */
+    { id:'clubber',         branch:'force',      name:'Clubber',
+      type:'passive', levelReq:3, statReq:{force:30},
+      cost:0,  costLabel:'Passive',
+      effect:'+10% bonus damage to every Strike.',
+      combatEffect:'strike_bonus_pct', value:0.10 },
+    { id:'mighty_fist',     branch:'force',      name:'Mighty Fist',
+      type:'active',  levelReq:5, statReq:{force:50, lore:20},
+      cost:14, costLabel:'14 Mana',
+      effect:'200% Strike damage and stuns the monster for one round.',
+      combatEffect:'strike_multiplier_stun', value:2.0 },
+    { id:'crusher',         branch:'force',      name:'Crusher',
+      type:'active',  levelReq:8, statReq:{force:70},
+      cost:18, costLabel:'18 Mana',
+      effect:'250% Strike damage. Cannot be used on consecutive rounds.',
+      combatEffect:'strike_multiplier_noconsec', value:2.5 },
+
+    /* Branch 3 — Road (Endurance) */
+    { id:'second_wind',     branch:'endurance',  name:'Second Wind',
+      type:'active',  levelReq:2, statReq:{endurance:25},
+      cost:10, costLabel:'10 Mana',
+      effect:'Restores 15 HP. Once per encounter.',
+      combatEffect:'heal_once', value:15 },
+    { id:'grinding_pace',   branch:'endurance',  name:'Grinding Pace',
+      type:'passive', levelReq:5, statReq:{endurance:45},
+      cost:0,  costLabel:'Passive',
+      effect:'+5% damage bonus for every round beyond Round 3.',
+      combatEffect:'damage_per_late_round', value:0.05 },
+    { id:'the_long_road',   branch:'endurance',  name:'The Long Road',
+      type:'passive', levelReq:6, statReq:{endurance:60},
+      cost:0,  costLabel:'Passive',
+      effect:'HP cannot drop below 5 from a single hit.',
+      combatEffect:'hp_floor', value:5 },
+
+    /* Branch 4 — Source (Resolve + Lore) */
+    { id:'steadfast',       branch:'resolve',    name:'Steadfast',
+      type:'passive', levelReq:2, statReq:{resolve:20},
+      cost:0,  costLabel:'Passive',
+      effect:'Auto-resist next attack when HP drops below 20%. Once per encounter.',
+      combatEffect:'auto_resist_low_hp', value:0.20 },
+    { id:'knowing_strike',  branch:'resolve',    name:'The Knowing Strike',
+      type:'active',  levelReq:5, statReq:{lore:30, resolve:30},
+      cost:15, costLabel:'15 Mana',
+      effect:'175% Strike damage and reduces monster damage by 20% for 2 rounds.',
+      combatEffect:'strike_debuff', value:1.75 },
+    { id:'word_of_source',  branch:'resolve',    name:'Word of the Source',
+      type:'active',  levelReq:7, statReq:{resolve:50, lore:40},
+      cost:25, costLabel:'25 Mana',
+      effect:'Massive Strike damage and fully restores HP. Once per day.',
+      combatEffect:'strike_heal_once_day', value:3.0 },
+
+    /* Branch 5 — Foundation (Core) */
+    { id:'ironbelly',       branch:'core',       name:'Ironbelly',
+      type:'passive', levelReq:2, statReq:{core:25},
+      cost:0,  costLabel:'Passive',
+      effect:'Flat -3 damage reduction per hit.',
+      combatEffect:'flat_damage_reduction', value:3 },
+    { id:'rooted',          branch:'core',       name:'Rooted',
+      type:'active',  levelReq:4, statReq:{core:40},
+      cost:10, costLabel:'10 Mana',
+      effect:'-50% incoming damage for one round.',
+      combatEffect:'endure_50pct', value:0.50 },
+    { id:'dead_still',      branch:'core',       name:'Dead Still',
+      type:'active',  levelReq:5, statReq:{core:50},
+      cost:12, costLabel:'12 Mana',
+      effect:'-75% incoming damage for one round.',
+      combatEffect:'endure_75pct', value:0.75 },
+  ];
+
+  var BRANCH_LABELS = {
+    iron:      'The Iron Branch',
+    force:     'The Force Branch',
+    endurance: 'The Road Branch',
+    resolve:   'The Source Branch',
+    core:      'The Foundation Branch'
+  };
+
+  var BRANCH_PREREQ_LABELS = {
+    iron:      'Prerequisite: Iron stat',
+    force:     'Prerequisite: Force stat',
+    endurance: 'Prerequisite: Endurance stat',
+    resolve:   'Prerequisite: Resolve + Lore stats',
+    core:      'Prerequisite: Core stat'
+  };
+
+  /* ── State for current level-up session ─────────────────── */
+  var LU = {
+    newLevel:          1,
+    selectedAbilityId: null
+  };
+
+  /* ── Check if an ability's stat prereqs are met ─────────── */
+  function abilityPrereqsMet(ability, stats) {
+    var reqs = ability.statReq;
+    for (var stat in reqs) {
+      if ((stats[stat] || 0) < reqs[stat]) return false;
+    }
+    return true;
+  }
+
+  /* ── Build the abilities tree HTML ──────────────────────── */
+  function buildAbilitiesTree(data) {
+    var container = document.getElementById('abilities-tree-container');
+    container.innerHTML = '';
+
+    var ownedIds  = (data.abilities && data.abilities.owned)  || [];
+    var level     = data.character.level || 1;
+    var stats     = data.stats || {};
+
+    var branches  = ['iron','force','endurance','resolve','core'];
+
+    branches.forEach(function(branch) {
+      var abilities = ABILITIES.filter(function(a) { return a.branch === branch; });
+
+      var branchEl = document.createElement('div');
+      branchEl.className = 'abilities-branch';
+
+      /* Branch header */
+      var header = document.createElement('div');
+      header.className = 'branch-header';
+      header.innerHTML =
+        '<span class="branch-name">' + BRANCH_LABELS[branch] + '</span>' +
+        '<span class="branch-prereq">' + BRANCH_PREREQ_LABELS[branch] + '</span>';
+      branchEl.appendChild(header);
+
+      abilities.forEach(function(ab) {
+        var card = document.createElement('div');
+        card.className = 'ability-card';
+
+        var owned      = ownedIds.indexOf(ab.id) !== -1;
+        var levelOk    = level >= ab.levelReq;
+        var statsOk    = abilityPrereqsMet(ab, stats);
+        var unlockable = !owned && levelOk && statsOk;
+
+        if (owned) {
+          card.classList.add('already-owned');
+        } else if (unlockable) {
+          card.classList.add('unlockable');
+          card.setAttribute('data-ability-id', ab.id);
+          card.addEventListener('click', function() { selectAbility(ab.id); });
+        } else {
+          card.classList.add('locked');
+        }
+
+        /* Type badge */
+        var badge = '<span class="ability-type-badge ' + ab.type + '">' + ab.type + '</span>';
+
+        /* Lock reason */
+        var lockReason = '';
+        if (!owned && !unlockable) {
+          var reasons = [];
+          if (!levelOk)  reasons.push('Level ' + ab.levelReq + ' required');
+          if (!statsOk) {
+            for (var s in ab.statReq) {
+              if ((stats[s] || 0) < ab.statReq[s]) {
+                reasons.push(s.charAt(0).toUpperCase() + s.slice(1) + ' ' + ab.statReq[s] + ' required (you have ' + Math.floor(stats[s] || 0) + ')');
+              }
+            }
+          }
+          lockReason = '<div class="ability-lock-reason">' + reasons.join(' · ') + '</div>';
+        }
+
+        /* Owned badge */
+        var ownedBadge = owned ? '<span class="ability-owned-badge">Owned</span>' : '';
+
+        card.innerHTML =
+          badge +
+          '<div class="ability-info">' +
+            '<div class="ability-name">' + ab.name + '</div>' +
+            '<div class="ability-effect">' + ab.effect + '</div>' +
+            lockReason +
+          '</div>' +
+          (ab.cost > 0 ? '<span class="ability-cost">' + ab.costLabel + '</span>' : '') +
+          ownedBadge;
+
+        branchEl.appendChild(card);
+      });
+
+      container.appendChild(branchEl);
+    });
+  }
+
+  /* ── Handle ability selection ────────────────────────────── */
+  function selectAbility(abilityId) {
+    /* Deselect all */
+    document.querySelectorAll('.ability-card.selected-this-level').forEach(function(el) {
+      el.classList.remove('selected-this-level');
+    });
+
+    /* Select clicked */
+    var card = document.querySelector('[data-ability-id="' + abilityId + '"]');
+    if (card) card.classList.add('selected-this-level');
+
+    LU.selectedAbilityId = abilityId;
+
+    /* Show confirm button */
+    var confirmBtn = document.getElementById('levelup-confirm-btn');
+    confirmBtn.classList.add('visible');
+
+    /* Update subheading with ability name */
+    var ab = ABILITIES.find(function(a) { return a.id === abilityId; });
+    if (ab) {
+      document.getElementById('abilities-subheading').textContent =
+        '"' + ab.name + '" — ' + ab.effect;
+    }
+  }
+
+  /* ── Confirm ability choice ──────────────────────────────── */
+  function confirmAbility() {
+    if (!LU.selectedAbilityId) return;
+    var data = loadData();
+    if (!data) return;
+
+    if (!data.abilities) data.abilities = { owned: [] };
+    if (data.abilities.owned.indexOf(LU.selectedAbilityId) === -1) {
+      data.abilities.owned.push(LU.selectedAbilityId);
+    }
+
+    saveData(data);
+    closeLevelUp();
+    populateHomeScreen(data);
+  }
+
+  /* ── Skip ability (can return later — but choice will be lost on next level) */
+  function skipAbility() {
+    closeLevelUp();
+  }
+
+  function closeLevelUp() {
+    document.getElementById('levelUpOverlay').classList.remove('visible');
+    LU.selectedAbilityId = null;
+    document.getElementById('levelup-confirm-btn').classList.remove('visible');
+    document.getElementById('abilities-subheading').textContent =
+      'Select an ability you have earned the right to carry.';
+  }
+
+  /* ── Show level-up screen ────────────────────────────────── */
+  function showLevelUp(newLevel, data) {
+    LU.newLevel = newLevel;
+    LU.selectedAbilityId = null;
+
+    var moment = LEVELUP_MOMENTS[newLevel] || {
+      title:   'Another Level',
+      passage: 'The road continues. So do you.'
+    };
+
+    document.getElementById('levelup-number').textContent  = ROMAN[newLevel] || newLevel;
+    document.getElementById('levelup-title').textContent   = moment.title;
+    document.getElementById('levelup-passage').textContent = moment.passage;
+    document.getElementById('levelup-confirm-btn').classList.remove('visible');
+
+    buildAbilitiesTree(data);
+
+    document.getElementById('levelUpOverlay').classList.add('visible');
+  }
+
+  /* ── Check for level-up after XP gain ───────────────────── */
+  function checkLevelUp(data) {
+    var level = data.character.level || 1;
+    if (level >= 10) return false;  /* max level */
+
+    var xp      = data.character.xp || 0;
+    var needed  = XP_THRESHOLDS[level]; /* threshold to reach level+1 */
+    if (!needed) return false;
+
+    if (xp >= needed) {
+      /* Level up */
+      data.character.level = level + 1;
+
+      /* Recalculate max HP and max Mana at new level */
+      var coreStat    = data.stats.core    || 0;
+      var resolveStat = data.stats.resolve || 0;
+      data.character.maxHp   = (data.character.level * 10) + Math.floor(coreStat / 10 * 5) + 40;
+      data.character.maxMana = 30 + Math.floor(resolveStat / 10 * 5) + (data.character.level * 3);
+
+      /* Restore HP to new max on level up */
+      data.character.hp = data.character.maxHp;
+
+      saveData(data);
+      return true;
+    }
+    return false;
+  }
+
+  /* ── Update home screen level display ───────────────────── */
+  /* Patch populateHomeScreen to show correct level Roman numeral */
+  var _origPopulateHome2 = populateHomeScreen;
+  populateHomeScreen = function(data) {
+    _origPopulateHome2(data);
+    var lvl = data.character.level || 1;
+    /* Update level display in character panel */
+    var lvlEl = document.querySelector('.meta-value.ember');
+    if (lvlEl) lvlEl.textContent = ROMAN[lvl] || lvl;
+
+    /* Update HP max if it has changed */
+    var coreStat = data.stats ? (data.stats.core || 0) : 0;
+    var maxHp = (lvl * 10) + Math.floor(coreStat / 10 * 5) + 40;
+    if (data.character.maxHp !== maxHp) {
+      /* Sync maxHp silently */
+    }
   };
 
 
