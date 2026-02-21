@@ -1172,6 +1172,791 @@
     }
 
 
+    /* ════════════════════════════════════════════════════════════
+       ABSENCE / FAILURE STATE OVERLAY  (Phase 4)
+    ════════════════════════════════════════════════════════════ */
+    #absenceOverlay {
+      position: fixed; inset: 0;
+      background: var(--ash);
+      z-index: 550;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.5s ease;
+    }
+
+    #absenceOverlay.visible { display: flex; }
+
+    .absence-shell {
+      width: 100%;
+      max-width: 580px;
+      padding: 0 28px;
+      text-align: center;
+    }
+
+    /* Tier indicator pip row */
+    .absence-tier-row {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 32px;
+    }
+
+    .absence-tier-pip {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--ironstone-dim);
+      border: 1px solid var(--ironstone-dim);
+    }
+
+    .absence-tier-pip.lit {
+      background: var(--ember);
+      border-color: var(--ember);
+      box-shadow: 0 0 8px rgba(196,92,26,0.5);
+    }
+
+    /* Eyebrow label — shows which tier this is */
+    .absence-eyebrow {
+      font-size: 0.58rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      margin-bottom: 20px;
+    }
+
+    /* Main narrative passage — parchment, IM Fell, italic */
+    .absence-passage {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--parchment);
+      line-height: 1.85;
+      margin-bottom: 40px;
+      padding: 28px 32px;
+      background:
+        linear-gradient(135deg, #2a2418 25%, transparent 25%) -6px 0,
+        linear-gradient(225deg, #2a2418 25%, transparent 25%) -6px 0,
+        linear-gradient(315deg, #2a2418 25%, transparent 25%),
+        linear-gradient(45deg,  #2a2418 25%, transparent 25%);
+      background-size: 12px 12px;
+      background-color: #231e17;
+      border-top: 1px solid rgba(74,82,64,0.3);
+      border-bottom: 1px solid rgba(74,82,64,0.3);
+      position: relative;
+    }
+
+    /* Left quote-mark decoration */
+    .absence-passage::before {
+      content: '"';
+      position: absolute;
+      top: 10px; left: 14px;
+      font-family: 'IM Fell English', serif;
+      font-size: 2.5rem;
+      color: var(--ironstone-dim);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    /* Days-missed callout */
+    .absence-days-callout {
+      font-size: 0.6rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      margin-bottom: 28px;
+    }
+
+    .absence-days-callout strong {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--bone);
+      display: block;
+      margin-bottom: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Stat freeze notice (Tier 2+) */
+    .absence-freeze-notice {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      color: var(--ironstone);
+      margin-bottom: 28px;
+      padding: 8px 16px;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    /* Mana drain notice (Tier 3) */
+    .absence-mana-notice {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      color: var(--ember);
+      margin-bottom: 28px;
+      padding: 8px 16px;
+      border: 1px solid rgba(196,92,26,0.3);
+      border-radius: 2px;
+      display: inline-block;
+      background: rgba(196,92,26,0.06);
+    }
+
+    /* Race warning (when a race is within 30 days) */
+    .absence-race-warning {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.82rem;
+      color: var(--ironstone);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    .absence-race-warning strong {
+      color: var(--ember);
+      font-style: normal;
+    }
+
+    /* Acknowledge button */
+    .absence-ack-btn {
+      padding: 13px 40px;
+      background: linear-gradient(135deg, var(--leather-edge), var(--leather-dark));
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .absence-ack-btn::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0; width: 2px;
+      background: var(--ironstone);
+      transition: background 0.2s;
+    }
+
+    .absence-ack-btn:hover {
+      border-color: rgba(196,92,26,0.5);
+      background: linear-gradient(135deg, #382818, #1e1208);
+    }
+
+    .absence-ack-btn:hover::before { background: var(--ember); }
+
+
+    /* ════════════════════════════════════════════════════════════
+       STREAK MILESTONE OVERLAY  (Phase 4)
+    ════════════════════════════════════════════════════════════ */
+    #milestoneOverlay {
+      position: fixed; inset: 0;
+      background: rgba(26,23,20,0.92);
+      z-index: 560;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    #milestoneOverlay.visible { display: flex; }
+
+    .milestone-shell {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 28px;
+      text-align: center;
+    }
+
+    .milestone-icon {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      opacity: 0.7;
+    }
+
+    .milestone-title {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.5rem;
+      color: var(--parchment);
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    .milestone-passage {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--ironstone);
+      line-height: 1.75;
+      margin-bottom: 32px;
+    }
+
+    .milestone-streak-display {
+      font-size: 3rem;
+      font-weight: 600;
+      color: var(--ember);
+      text-shadow: 0 0 30px rgba(196,92,26,0.4);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .milestone-streak-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      margin-bottom: 32px;
+    }
+
+    .milestone-dismiss-btn {
+      padding: 11px 32px;
+      background: none;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--ironstone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .milestone-dismiss-btn:hover { border-color: var(--ironstone); color: var(--bone); }
+
+
+    /* ════════════════════════════════════════════════════════════
+       PHASE 5 — COMBAT SYSTEM
+    ════════════════════════════════════════════════════════════ */
+
+    /* ── Venture Out — encounter preview overlay ──────────── */
+    #encounterOverlay {
+      position: fixed; inset: 0;
+      background: var(--ash);
+      z-index: 420;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.5s ease;
+    }
+
+    #encounterOverlay.visible { display: flex; }
+
+    .encounter-shell {
+      width: 100%;
+      max-width: 600px;
+      padding: 0 28px;
+    }
+
+    .encounter-eyebrow {
+      font-size: 0.58rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      margin-bottom: 14px;
+      text-align: center;
+    }
+
+    .encounter-scene {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.92rem;
+      color: var(--ironstone);
+      line-height: 1.8;
+      margin-bottom: 28px;
+      padding: 20px 24px;
+      border-top: 1px solid var(--ironstone-dim);
+      border-bottom: 1px solid var(--ironstone-dim);
+      text-align: center;
+    }
+
+    /* Monster card in encounter preview */
+    .encounter-monster-card {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      padding: 20px;
+      background: #1e1b18;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .encounter-monster-portrait {
+      width: 72px;
+      height: 72px;
+      background: var(--ironstone-dim);
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      flex-shrink: 0;
+      border: 1px solid rgba(74,82,64,0.3);
+    }
+
+    .encounter-monster-info { flex: 1; }
+
+    .encounter-monster-tier {
+      font-size: 0.55rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      margin-bottom: 4px;
+    }
+
+    .encounter-monster-name {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.35rem;
+      color: var(--parchment);
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+
+    .encounter-monster-desc {
+      font-size: 0.72rem;
+      color: var(--ironstone);
+      line-height: 1.6;
+    }
+
+    .encounter-monster-stats {
+      display: flex;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .encounter-stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .encounter-stat-label {
+      font-size: 0.55rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--ironstone-dim);
+    }
+
+    .encounter-stat-value {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--bone);
+    }
+
+    /* Engage / Withdraw buttons */
+    .encounter-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .encounter-btn {
+      padding: 14px;
+      border-radius: 2px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .encounter-btn.engage {
+      background: linear-gradient(135deg, var(--leather-edge), var(--leather-dark));
+      border: 1px solid rgba(196,92,26,0.4);
+      color: var(--ember);
+    }
+
+    .encounter-btn.engage::before {
+      content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 2px;
+      background: var(--ember);
+    }
+
+    .encounter-btn.engage:hover {
+      background: linear-gradient(135deg, #382818, #1e1208);
+      border-color: rgba(196,92,26,0.7);
+    }
+
+    .encounter-btn.withdraw {
+      background: none;
+      border: 1px solid var(--ironstone-dim);
+      color: var(--ironstone);
+    }
+
+    .encounter-btn.withdraw:hover {
+      border-color: var(--ironstone);
+      color: var(--bone);
+    }
+
+
+    /* ── Active combat screen ─────────────────────────────── */
+    #combatOverlay {
+      position: fixed; inset: 0;
+      background: var(--ash);
+      z-index: 430;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #combatOverlay.visible { display: flex; }
+
+    /* Combat arena — top section */
+    .combat-arena {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr auto;
+      gap: 0;
+      min-height: 0;
+      padding: 20px 28px 0;
+    }
+
+    /* Player side */
+    .combat-side {
+      display: flex;
+      flex-direction: column;
+      padding: 16px 20px;
+      position: relative;
+    }
+
+    .combat-side.player {
+      border-right: 1px solid var(--ironstone-dim);
+    }
+
+    .combat-side-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      margin-bottom: 8px;
+    }
+
+    .combat-name {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.2rem;
+      color: var(--parchment);
+      margin-bottom: 14px;
+      line-height: 1;
+    }
+
+    /* HP bar */
+    .combat-hp-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .combat-hp-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+    }
+
+    .combat-hp-numbers {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--bone);
+    }
+
+    .combat-hp-track {
+      height: 8px;
+      background: var(--ironstone-dim);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .combat-hp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3a5a3a, #6a9a6a);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .combat-hp-fill.danger {
+      background: linear-gradient(90deg, #5a2a2a, #8a4a4a);
+    }
+
+    .combat-hp-fill.enemy {
+      background: linear-gradient(90deg, #5a3a1a, #8a5a2a);
+    }
+
+    /* Mana pips in combat */
+    .combat-mana-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .combat-mana-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+    }
+
+    .combat-mana-pips {
+      display: flex;
+      gap: 2px;
+      flex-wrap: wrap;
+      max-width: 200px;
+    }
+
+    .combat-mana-pip {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--ironstone-dim);
+      border: 1px solid rgba(74,82,64,0.4);
+    }
+
+    .combat-mana-pip.filled {
+      background: radial-gradient(circle, #6a8a9a, #4a6878);
+      border-color: #5a7888;
+    }
+
+    /* Monster portrait in combat */
+    .combat-monster-portrait {
+      font-size: 4rem;
+      text-align: center;
+      margin-bottom: 10px;
+      opacity: 0.85;
+    }
+
+    .combat-monster-portrait.struck {
+      animation: struck 0.3s ease;
+    }
+
+    @keyframes struck {
+      0%   { transform: translateX(0) scale(1); opacity: 0.85; }
+      30%  { transform: translateX(-8px) scale(0.95); opacity: 0.5; }
+      100% { transform: translateX(0) scale(1); opacity: 0.85; }
+    }
+
+    .combat-player-portrait {
+      font-size: 3rem;
+      text-align: center;
+      margin-bottom: 10px;
+      opacity: 0.75;
+    }
+
+    .combat-player-portrait.struck {
+      animation: playerStruck 0.3s ease;
+    }
+
+    @keyframes playerStruck {
+      0%   { transform: translateX(0); }
+      30%  { transform: translateX(8px); opacity: 0.4; }
+      100% { transform: translateX(0); opacity: 0.75; }
+    }
+
+    /* Narrative log — spans full width */
+    .combat-log {
+      grid-column: 1 / -1;
+      padding: 12px 20px;
+      min-height: 72px;
+      max-height: 80px;
+      overflow-y: auto;
+      border-top: 1px solid var(--ironstone-dim);
+      background: #131110;
+      scrollbar-width: thin;
+      scrollbar-color: var(--ironstone-dim) transparent;
+    }
+
+    .combat-log-line {
+      font-family: 'IM Fell English', serif;
+      font-size: 0.85rem;
+      color: var(--parchment);
+      line-height: 1.6;
+      margin-bottom: 2px;
+    }
+
+    .combat-log-line.player-action { color: var(--bone); }
+    .combat-log-line.monster-action { color: var(--ironstone); }
+    .combat-log-line.system-note { font-size: 0.72rem; color: var(--ironstone-dim); font-style: italic; }
+
+    /* Combat action buttons */
+    .combat-footer {
+      padding: 14px 28px;
+      background: #131110;
+      border-top: 1px solid var(--ironstone-dim);
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .combat-action-btn {
+      flex: 1;
+      padding: 12px 8px;
+      background: linear-gradient(135deg, var(--leather-edge), var(--leather-dark));
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.15s, border-color 0.15s;
+      text-align: center;
+    }
+
+    .combat-action-btn::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0; width: 2px;
+      background: var(--ironstone-dim);
+      transition: background 0.15s;
+    }
+
+    .combat-action-btn:hover:not(:disabled) {
+      border-color: rgba(196,92,26,0.5);
+      background: linear-gradient(135deg, #382818, #1e1208);
+    }
+
+    .combat-action-btn:hover:not(:disabled)::before { background: var(--ember); }
+
+    .combat-action-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .combat-action-btn .btn-cost {
+      display: block;
+      font-size: 0.55rem;
+      color: var(--ironstone);
+      letter-spacing: 0.1em;
+      margin-top: 3px;
+      font-weight: 400;
+    }
+
+    .combat-action-btn.primed {
+      border-color: rgba(196,92,26,0.6);
+      background: rgba(196,92,26,0.1);
+    }
+
+    .combat-action-btn.primed::before { background: var(--ember); }
+
+    /* Round counter */
+    .combat-round-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 6px 20px;
+      background: #131110;
+      border-bottom: 1px solid var(--ironstone-dim);
+      flex-shrink: 0;
+    }
+
+    .combat-round-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+    }
+
+    /* ── Combat result overlay ────────────────────────────── */
+    #combatResultOverlay {
+      position: fixed; inset: 0;
+      background: rgba(26,23,20,0.94);
+      z-index: 440;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    #combatResultOverlay.visible { display: flex; }
+
+    .combat-result-shell {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 28px;
+      text-align: center;
+    }
+
+    .combat-result-icon { font-size: 2.5rem; margin-bottom: 16px; }
+
+    .combat-result-title {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.8rem;
+      color: var(--parchment);
+      margin-bottom: 8px;
+    }
+
+    .combat-result-xp {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--ember);
+      margin-bottom: 8px;
+    }
+
+    .combat-result-xp span {
+      font-size: 0.65rem;
+      font-weight: 400;
+      color: var(--ironstone);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-left: 6px;
+    }
+
+    .combat-result-passage {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--ironstone);
+      line-height: 1.75;
+      margin: 20px 0 28px;
+    }
+
+    .combat-result-btn {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--leather-edge), var(--leather-dark));
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .combat-result-btn:hover {
+      border-color: rgba(196,92,26,0.5);
+      background: linear-gradient(135deg, #382818, #1e1208);
+    }
+
+    .combat-injuries-notice {
+      font-size: 0.65rem;
+      color: var(--ironstone);
+      letter-spacing: 0.15em;
+      margin-bottom: 20px;
+      padding: 8px 16px;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+
   </style>
 </head>
 <body>
@@ -1352,6 +2137,196 @@
   </div>
 </div>
 
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     PHASE 5 — ENCOUNTER PREVIEW OVERLAY
+══════════════════════════════════════════════════════════════ -->
+<div id="encounterOverlay">
+  <div class="encounter-shell">
+
+    <p class="encounter-eyebrow">The Road Ahead</p>
+
+    <div class="encounter-scene" id="encounter-scene-text">—</div>
+
+    <div class="encounter-monster-card">
+      <div class="encounter-monster-portrait" id="encounter-portrait">☠</div>
+      <div class="encounter-monster-info">
+        <div class="encounter-monster-tier" id="encounter-tier-label">Tier 1</div>
+        <div class="encounter-monster-name" id="encounter-name">—</div>
+        <div class="encounter-monster-desc" id="encounter-desc">—</div>
+        <div class="encounter-monster-stats">
+          <div class="encounter-stat-item">
+            <span class="encounter-stat-label">HP</span>
+            <span class="encounter-stat-value" id="encounter-hp">—</span>
+          </div>
+          <div class="encounter-stat-item">
+            <span class="encounter-stat-label">Damage</span>
+            <span class="encounter-stat-value" id="encounter-dmg">—</span>
+          </div>
+          <div class="encounter-stat-item">
+            <span class="encounter-stat-label">XP Reward</span>
+            <span class="encounter-stat-value" id="encounter-xp">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="encounter-actions">
+      <button class="encounter-btn engage" onclick="startCombat()">⚔ Engage</button>
+      <button class="encounter-btn withdraw" onclick="withdrawEncounter()">← Withdraw</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     PHASE 5 — ACTIVE COMBAT OVERLAY
+══════════════════════════════════════════════════════════════ -->
+<div id="combatOverlay">
+
+  <!-- Round counter header -->
+  <div class="combat-round-badge">
+    <span class="combat-round-label">Round <span id="combat-round-num">1</span></span>
+  </div>
+
+  <!-- Arena: player left, monster right, log below -->
+  <div class="combat-arena">
+
+    <!-- Player side -->
+    <div class="combat-side player">
+      <div class="combat-side-label">Warrior</div>
+      <div class="combat-player-portrait" id="combat-player-portrait">🗡</div>
+      <div class="combat-name" id="combat-player-name">—</div>
+
+      <div class="combat-hp-row">
+        <span class="combat-hp-label">HP</span>
+        <span class="combat-hp-numbers"><span id="combat-player-hp">50</span> / <span id="combat-player-maxhp">50</span></span>
+      </div>
+      <div class="combat-hp-track">
+        <div class="combat-hp-fill" id="combat-player-hp-bar" style="width:100%"></div>
+      </div>
+
+      <div class="combat-mana-row">
+        <span class="combat-mana-label">Mana</span>
+      </div>
+      <div class="combat-mana-pips" id="combat-mana-pips"></div>
+    </div>
+
+    <!-- Monster side -->
+    <div class="combat-side monster">
+      <div class="combat-side-label" id="combat-monster-tier-label">Tier 1</div>
+      <div class="combat-monster-portrait" id="combat-monster-portrait">☠</div>
+      <div class="combat-name" id="combat-monster-name">—</div>
+
+      <div class="combat-hp-row">
+        <span class="combat-hp-label">HP</span>
+        <span class="combat-hp-numbers"><span id="combat-monster-hp">—</span> / <span id="combat-monster-maxhp">—</span></span>
+      </div>
+      <div class="combat-hp-track">
+        <div class="combat-hp-fill enemy" id="combat-monster-hp-bar" style="width:100%"></div>
+      </div>
+    </div>
+
+    <!-- Narrative log -->
+    <div class="combat-log" id="combat-log"></div>
+
+  </div>
+
+  <!-- Action buttons -->
+  <div class="combat-footer" id="combat-footer">
+    <button class="combat-action-btn" id="btn-strike"  onclick="combatAction('strike')">
+      Strike
+      <span class="btn-cost">0 Mana · Force</span>
+    </button>
+    <button class="combat-action-btn" id="btn-endure"  onclick="combatAction('endure')">
+      Endure
+      <span class="btn-cost">0 Mana · End+Core</span>
+    </button>
+    <button class="combat-action-btn" id="btn-read"    onclick="combatAction('read')">
+      Read the Enemy
+      <span class="btn-cost">0 Mana · Lore</span>
+    </button>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     PHASE 5 — COMBAT RESULT OVERLAY
+══════════════════════════════════════════════════════════════ -->
+<div id="combatResultOverlay">
+  <div class="combat-result-shell">
+    <div class="combat-result-icon" id="result-icon">—</div>
+    <div class="combat-result-title" id="result-title">—</div>
+    <div class="combat-result-xp" id="result-xp" style="display:none;"></div>
+    <div class="combat-injuries-notice" id="result-injury-notice" style="display:none;">
+      Venture Out is unavailable for the rest of today. Returns tomorrow with full HP.
+    </div>
+    <div class="combat-result-passage" id="result-passage">—</div>
+    <button class="combat-result-btn" onclick="closeCombatResult()">Return</button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     ABSENCE / FAILURE STATE OVERLAY  (Phase 4)
+══════════════════════════════════════════════════════════════ -->
+<div id="absenceOverlay">
+  <div class="absence-shell">
+
+    <!-- Tier pips: 3 dots, lit = tier reached -->
+    <div class="absence-tier-row">
+      <div class="absence-tier-pip" id="tier-pip-1"></div>
+      <div class="absence-tier-pip" id="tier-pip-2"></div>
+      <div class="absence-tier-pip" id="tier-pip-3"></div>
+    </div>
+
+    <p class="absence-eyebrow" id="absence-eyebrow">The Road Goes Cold</p>
+
+    <!-- Days callout -->
+    <div class="absence-days-callout">
+      <strong id="absence-days-number">0</strong>
+      <span id="absence-days-label">days since your last session</span>
+    </div>
+
+    <!-- Narrative passage -->
+    <div class="absence-passage" id="absence-passage-text">—</div>
+
+    <!-- Conditional notices (shown/hidden by JS) -->
+    <div class="absence-freeze-notice" id="absence-freeze-notice" style="display:none;">
+      Stat growth paused for the duration of the absence. Stats have not decayed.
+    </div>
+
+    <div class="absence-mana-notice" id="absence-mana-notice" style="display:none;">
+      Mana pool reduced by 50%. Prayer and journaling will restore it.
+    </div>
+
+    <div class="absence-race-warning" id="absence-race-warning" style="display:none;"></div>
+
+    <!-- Acknowledge -->
+    <button class="absence-ack-btn" id="absence-ack-btn" onclick="dismissAbsence()">
+      I hear it. Begin again.
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     STREAK MILESTONE OVERLAY  (Phase 4)
+══════════════════════════════════════════════════════════════ -->
+<div id="milestoneOverlay">
+  <div class="milestone-shell">
+    <div class="milestone-icon" id="milestone-icon">—</div>
+    <div class="milestone-streak-display" id="milestone-number">0</div>
+    <div class="milestone-streak-label" id="milestone-label">Day Streak</div>
+    <div class="milestone-title" id="milestone-title">—</div>
+    <p class="milestone-passage" id="milestone-passage">—</p>
+    <button class="milestone-dismiss-btn" onclick="dismissMilestone()">Continue</button>
+  </div>
+</div>
 
 
 <!-- ══════════════════════════════════════════════════════════════
@@ -2183,7 +3158,18 @@
     var data = loadData();
     if (data && data.setupComplete) {
       document.getElementById('setupOverlay').style.display = 'none';
+
+      /* Phase 4: run streak health checks before displaying home screen */
+      checkResolveStreak(data);
+      checkRestorationStreak(data);
+
+      /* Re-load after possible saves inside checks */
+      data = loadData();
+
       populateHomeScreen(data);
+
+      /* Phase 4: check for absence tier message */
+      checkAbsenceOnLogin(data);
     }
     /* else: setup overlay is already visible by default */
   })();
@@ -2516,16 +3502,32 @@
     };
     data.log.push(logEntry);
 
+    /* Phase 4: detect recovery (first session after absence) */
+    var absenceMissed = calcAbsenceDays(data);
+    var recoveryTier  = null;
+    if (absenceMissed >= 7)      recoveryTier = 3;
+    else if (absenceMissed >= 4) recoveryTier = 2;
+    else if (absenceMissed >= 2) recoveryTier = 1;
+    _pendingRecoveryTier = recoveryTier;
+
+    /* Phase 4: clear the tier 3 drain flag so it doesn't re-apply */
+    if (recoveryTier) {
+      data.streaks.tier3DrainApplied = false;
+    }
+
     saveData(data);
 
-    /* Show summary */
+    /* Phase 4: check for streak milestones */
+    checkMilestonesAfterCommit(data);
+
+    /* Show summary — pass recovery tier for flavour override */
     closeLog();
-    showSummary(prevStats, data.stats, deltas, sessionType);
+    showSummary(prevStats, data.stats, deltas, sessionType, recoveryTier);
     populateHomeScreen(data);
   }
 
   /* ── SUMMARY SCREEN ─────────────────────────────────────── */
-  function showSummary(prevStats, newStats, deltas, sessionType) {
+  function showSummary(prevStats, newStats, deltas, sessionType, recoveryTier) {
     var list = document.getElementById('summary-stats-list');
     list.innerHTML = '';
 
@@ -2559,7 +3561,14 @@
       list.appendChild(none);
     }
 
-    document.getElementById('summary-flavour-text').textContent = randomFlavour(sessionType);
+    /* Phase 4: if this is a post-absence session, use recovery passage instead */
+    var flavourText;
+    if (recoveryTier) {
+      flavourText = '"' + (getRecoveryFlavour(recoveryTier) || '') + '"';
+    } else {
+      flavourText = randomFlavour(sessionType);
+    }
+    document.getElementById('summary-flavour-text').textContent = flavourText;
     document.getElementById('summaryOverlay').classList.add('visible');
   }
 
@@ -2576,6 +3585,931 @@
       if (data && data.setupComplete) openLog();
     });
   });
+
+
+  /* ════════════════════════════════════════════════════════════
+     PHASE 4 — STREAK TRACKING & FAILURE STATES
+  ════════════════════════════════════════════════════════════ */
+
+  /* ── Absence tier passages ──────────────────────────────── */
+  var ABSENCE_PASSAGES = {
+    tier1: "You were not here. The road did not wait. The cold moved in from the east and settled where your fire had been. Two days. Three. The Reaches do not count them with sympathy.",
+    tier2: "Five days. The Iron Gate does not move for the man who stopped coming. Whatever you were building in the cold before dawn — it waits, unchanged, for you to return to it. But it does not grow without you.",
+    tier3: "A week gone. The Reaches have forgotten your name. Begin again."
+  };
+
+  var ABSENCE_RECOVERY = {
+    tier1: "You came back. The road is the same road. The cold does not care that you returned — but you returned. That is the only thing that was ever asked.",
+    tier2: "Four days gone and now here again. The fire is smaller than it was. You rebuild it the only way it can be rebuilt — one session, one day, one choice at a time.",
+    tier3: "A week. You know what it cost. The Reaches know too. There is no ceremony for beginning again — only the beginning. Start."
+  };
+
+  /* ── Streak milestone definitions ──────────────────────── */
+  var STREAK_MILESTONES = [
+    { days: 7,   icon: '🔥', title: 'Seven Days',
+      passage: 'The Reaches have begun to recognise your footprints.' },
+    { days: 14,  icon: '⚔️', title: 'Two Weeks',
+      passage: 'The habit has roots. Pull it and something will resist.' },
+    { days: 30,  icon: '🗡️', title: 'A Month',
+      passage: 'This is no longer a decision you make each day. It is who you are becoming.' },
+    { days: 50,  icon: '🌑', title: 'Fifty Days',
+      passage: 'Most people stopped before now. You did not.' },
+    { days: 100, icon: '⚡', title: 'One Hundred Days',
+      passage: 'The road behind you is longer than the road ahead to October.' }
+  ];
+
+  /* Upcoming races for the 30-day warning in Tier 2 ───────── */
+  var RACES = [
+    { name: 'Trial of the Iron Gate',   date: '2025-05-23', event: 'Spartan 5K Sprint' },
+    { name: 'Running of the Ashwood',   date: '2025-06-20', event: 'Trail Run' },
+    { name: 'March on Valdenmoor',      date: '2025-09-21', event: 'Spartan 21K Super' },
+    { name: 'Reckoning at the Black Spire', date: '2025-10-01', event: 'Trifecta Weekend' }
+  ];
+
+  /* ── Helper: days between two date strings ──────────────── */
+  function daysBetween(dateStrA, dateStrB) {
+    var a = new Date(dateStrA);
+    var b = new Date(dateStrB);
+    a.setHours(0,0,0,0);
+    b.setHours(0,0,0,0);
+    return Math.round((b - a) / 86400000);
+  }
+
+  function todayStr() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  /* ── Calculate training absence in days ─────────────────── */
+  function calcAbsenceDays(data) {
+    var last = data.streaks.lastTrainingDate;
+    if (!last) return 0;
+    var diff = daysBetween(last, todayStr());
+    return diff > 0 ? diff : 0;
+  }
+
+  /* ── Get nearest upcoming race within 30 days ──────────── */
+  function nearRaceWarning() {
+    var today = todayStr();
+    for (var i = 0; i < RACES.length; i++) {
+      var r = RACES[i];
+      var d = daysBetween(today, r.date);
+      if (d >= 0 && d <= 30) return r;
+    }
+    return null;
+  }
+
+  /* ── Apply Tier 3 mana drain ─────────────────────────────── */
+  function applyManaDrain(data) {
+    if (!data.streaks.tier3DrainApplied) {
+      data.character.mana = Math.floor((data.character.mana || 0) * 0.5);
+      data.streaks.tier3DrainApplied = true;
+      saveData(data);
+    }
+  }
+
+  /* ── Show absence overlay ────────────────────────────────── */
+  function showAbsence(tier, missedDays, data) {
+    /* Tier pips */
+    for (var t = 1; t <= 3; t++) {
+      var pip = document.getElementById('tier-pip-' + t);
+      pip.classList.toggle('lit', t <= tier);
+    }
+
+    /* Eyebrow */
+    var eyebrows = {1: 'The Road Goes Cold', 2: 'The Reaches Remember', 3: 'Forgotten'};
+    document.getElementById('absence-eyebrow').textContent = eyebrows[tier] || 'The Road Goes Cold';
+
+    /* Days callout */
+    document.getElementById('absence-days-number').textContent = missedDays;
+    document.getElementById('absence-days-label').textContent  =
+      missedDays === 1 ? 'day since your last session' : 'days since your last session';
+
+    /* Passage */
+    var passageKey = 'tier' + tier;
+    document.getElementById('absence-passage-text').textContent =
+      ABSENCE_PASSAGES[passageKey] || ABSENCE_PASSAGES.tier1;
+
+    /* Freeze notice for Tier 2+ */
+    document.getElementById('absence-freeze-notice').style.display = (tier >= 2) ? 'inline-block' : 'none';
+
+    /* Mana drain notice for Tier 3 */
+    document.getElementById('absence-mana-notice').style.display = (tier >= 3) ? 'inline-block' : 'none';
+
+    /* Race warning for Tier 2+ if race within 30 days */
+    var raceWarn = document.getElementById('absence-race-warning');
+    if (tier >= 2) {
+      var near = nearRaceWarning();
+      if (near) {
+        var daysLeft = daysBetween(todayStr(), near.date);
+        raceWarn.style.display = 'block';
+        raceWarn.innerHTML =
+          '<strong>' + near.name + '</strong> is ' + daysLeft +
+          ' days away. The ' + near.event + ' does not move for anyone.';
+      } else {
+        raceWarn.style.display = 'none';
+      }
+    } else {
+      raceWarn.style.display = 'none';
+    }
+
+    /* Button text for Tier 3 */
+    if (tier >= 3) {
+      document.getElementById('absence-ack-btn').textContent = 'Begin again.';
+    } else {
+      document.getElementById('absence-ack-btn').textContent = 'I hear it. Begin again.';
+    }
+
+    document.getElementById('absenceOverlay').classList.add('visible');
+  }
+
+  /* ── Dismiss absence overlay ─────────────────────────────── */
+  function dismissAbsence() {
+    document.getElementById('absenceOverlay').classList.remove('visible');
+    /* Mark that the absence message has been seen for today */
+    var data = loadData();
+    if (data) {
+      data.streaks.lastAbsenceSeenDate = todayStr();
+      /* Clear the Tier 3 drain flag once acknowledged so it doesn't re-drain */
+      /* (flag stays set — just cleared from pending display) */
+      saveData(data);
+    }
+  }
+
+  /* ── Show streak milestone overlay ──────────────────────── */
+  function showMilestone(streak, streakLabel) {
+    var milestone = null;
+    for (var i = STREAK_MILESTONES.length - 1; i >= 0; i--) {
+      if (streak === STREAK_MILESTONES[i].days) {
+        milestone = STREAK_MILESTONES[i];
+        break;
+      }
+    }
+    if (!milestone) return;
+
+    document.getElementById('milestone-icon').textContent    = milestone.icon;
+    document.getElementById('milestone-number').textContent  = streak;
+    document.getElementById('milestone-label').textContent   = streakLabel + ' Streak';
+    document.getElementById('milestone-title').textContent   = milestone.title;
+    document.getElementById('milestone-passage').textContent = '"' + milestone.passage + '"';
+    document.getElementById('milestoneOverlay').classList.add('visible');
+  }
+
+  function dismissMilestone() {
+    document.getElementById('milestoneOverlay').classList.remove('visible');
+  }
+
+  /* ── Recovery flavour — shown in stat summary after absence ─ */
+  function getRecoveryFlavour(tier) {
+    if (!tier) return null;
+    return ABSENCE_RECOVERY['tier' + tier] || null;
+  }
+
+  /* ── Core login check — called from init() ───────────────── */
+  function checkAbsenceOnLogin(data) {
+    var today = todayStr();
+
+    /* Don't show if already acknowledged today */
+    if (data.streaks.lastAbsenceSeenDate === today) return;
+
+    var missed = calcAbsenceDays(data);
+
+    /* Tier 0: 0-1 days — no action */
+    if (missed <= 1) return;
+
+    /* Tier 1: 2–3 days */
+    if (missed >= 2 && missed <= 3) {
+      /* Reset training streak */
+      data.streaks.training = 0;
+      saveData(data);
+      showAbsence(1, missed, data);
+      return;
+    }
+
+    /* Tier 2: 4–6 days */
+    if (missed >= 4 && missed <= 6) {
+      data.streaks.training = 0;
+      saveData(data);
+      showAbsence(2, missed, data);
+      return;
+    }
+
+    /* Tier 3: 7+ days */
+    if (missed >= 7) {
+      data.streaks.training = 0;
+      applyManaDrain(data);
+      showAbsence(3, missed, data);
+      return;
+    }
+  }
+
+  /* ── Resolve streak check ────────────────────────────────── */
+  function checkResolveStreak(data) {
+    var today = todayStr();
+    var last  = data.streaks.lastResolveDate;
+    if (!last) return;
+    var missed = daysBetween(last, today);
+    /* Resolve streak resets on first missed day */
+    if (missed >= 2) {
+      data.streaks.resolve = 0;
+      saveData(data);
+    }
+  }
+
+  /* ── Restoration streak check ────────────────────────────── */
+  function checkRestorationStreak(data) {
+    /* Restoration is weekly — check if last week's Sunday was missed */
+    var lastWeek = data.streaks.lastRestorationWeek;
+    if (!lastWeek) return;
+    var today    = new Date(); today.setHours(0,0,0,0);
+    var lastDate = new Date(lastWeek);
+    var weekDiff = Math.floor((today - lastDate) / (7 * 86400000));
+    if (weekDiff >= 2) {
+      /* Missed at least one Sunday — reset */
+      data.streaks.restoration = 0;
+      saveData(data);
+    }
+  }
+
+  /* ── Check for milestone after a commit ─────────────────── */
+  function checkMilestonesAfterCommit(data) {
+    var trainingStreak = data.streaks.training || 0;
+    var resolveStreak  = data.streaks.resolve  || 0;
+
+    /* Check training milestones */
+    for (var i = 0; i < STREAK_MILESTONES.length; i++) {
+      if (trainingStreak === STREAK_MILESTONES[i].days) {
+        showMilestone(trainingStreak, 'Training');
+        return; /* Show one at a time */
+      }
+    }
+    /* Check resolve milestones */
+    for (var j = 0; j < STREAK_MILESTONES.length; j++) {
+      if (resolveStreak === STREAK_MILESTONES[j].days) {
+        showMilestone(resolveStreak, 'Resolve');
+        return;
+      }
+    }
+  }
+
+  /* ── Store which absence tier was active before recovery ─── */
+  var _pendingRecoveryTier = null;
+
+
+
+  /* ════════════════════════════════════════════════════════════
+     PHASE 5 — COMBAT ENGINE
+  ════════════════════════════════════════════════════════════ */
+
+  /* ── Monster roster ─────────────────────────────────────── */
+  var MONSTERS = [
+    /* ── Tier 1 ── */
+    { id:'ash_hound',    tier:1, name:'The Ash Hound',   hp:30,  xp:50,  dmgMin:6,  dmgMax:10, portrait:'🐺',
+      desc:'A gaunt grey dog with hollow eyes, fur matted with road dust. Moves in short bursts, retreats when struck hard.',
+      special: null },
+    { id:'barrow_rat',   tier:1, name:'Barrow Rat',      hp:20,  xp:35,  dmgMin:4,  dmgMax:7,  portrait:'🐀',
+      desc:'A large rodent the size of a small dog, grey-furred and red-eyed. Attacks in quick darts. Easier prey than it looks.',
+      special: null },
+    { id:'drifter',      tier:1, name:'Reaches Drifter', hp:35,  xp:50,  dmgMin:7,  dmgMax:11, portrait:'🧟',
+      desc:'A wandering vagrant turned feral. Fights with a broken bottle. No tactics, just desperation and dirt.',
+      special: null },
+    { id:'fog_crow',     tier:1, name:'Fog Crow',        hp:25,  xp:40,  dmgMin:5,  dmgMax:8,  portrait:'🐦',
+      desc:'An oversized black bird with reflective eyes. Attacks twice on its second round, then retreats to observe.',
+      special: { type:'double_strike', triggerRound:2 } },
+
+    /* ── Tier 2 ── */
+    { id:'marshwalker',  tier:2, name:'Marshwalker',     hp:50,  xp:80,  dmgMin:9,  dmgMax:14, portrait:'👣',
+      desc:'A pale figure that moves through low ground without sound. Heals itself partway through the fight.',
+      special: { type:'heal', triggerRound:3, amount:10 } },
+    { id:'hollow_knight',tier:2, name:'The Hollow Knight',hp:55, xp:90,  dmgMin:10, dmgMax:15, portrait:'🛡',
+      desc:'A dead soldier in rusted mail who does not feel pain. Slow but hits with mechanical precision.',
+      special: { type:'damage_reduction', flat:3 } },
+    { id:'ironwood',     tier:2, name:'Ironwood Stalker', hp:45, xp:75,  dmgMin:8,  dmgMax:13, portrait:'🌲',
+      desc:'A territorial creature with bark-coloured hide that ambushes rather than chases. Predictable if you have read animals.',
+      special: { type:'surge', triggerRound:4, multiplier:1.5 } },
+    { id:'candle_wraith', tier:2, name:'Candle Wraith',  hp:40,  xp:85,  dmgMin:4,  dmgMax:18, portrait:'🕯',
+      desc:'A flickering presence that alternates between near-absence and sudden violence. Time your Endure on the heavy rounds.',
+      special: { type:'alternating', lightDmg:4, heavyDmg:18 } },
+
+    /* ── Tier 3 ── (available at level 4+) */
+    { id:'grey_reaver',  tier:3, name:'The Grey Reaver', hp:80,  xp:130, dmgMin:13, dmgMax:19, portrait:'⚔️',
+      desc:'A scarred mercenary who has survived too many fights. Gets more dangerous the longer combat continues.',
+      special: { type:'escalating_rage', startRound:5, bonusPerRound:4 } },
+    { id:'thornback',    tier:3, name:'Thornback',       hp:70,  xp:120, dmgMin:12, dmgMax:17, portrait:'🦔',
+      desc:'A creature with a ridged carapace that makes direct assault costly. Punishes Strike spam.',
+      special: { type:'reflect', reflectDmg:3 } },
+    { id:'warden_pass',  tier:3, name:'Warden of the Pass',hp:90,xp:140, dmgMin:14, dmgMax:20, portrait:'🗿',
+      desc:'A disciplined guardian who fights with military patience. The shield round forces you to plan around one wasted turn.',
+      special: { type:'shield_round', triggerRound:2 } },
+    { id:'ashfield_rev', tier:3, name:'Ashfield Revenant',hp:75,xp:135, dmgMin:12, dmgMax:18, portrait:'💀',
+      desc:'A resurrected soldier that ironically rewards the player who can land a massive single hit.',
+      special: { type:'stun_on_big_hit', threshold:30 } },
+
+    /* ── Tier 4 ── (available at level 6+) */
+    { id:'iron_widow',   tier:4, name:'The Iron Widow',  hp:120, xp:200, dmgMin:17, dmgMax:24, portrait:'🕷',
+      desc:'A huntress with wire-wrapped hands who fights without expression. The poison is the test.',
+      special: { type:'poison', triggerRound:3, dmgPerRound:5, duration:3 } },
+    { id:'veldrath',     tier:4, name:'Veldrath the Unyielding',hp:130,xp:220,dmgMin:18,dmgMax:25,portrait:'👹',
+      desc:'An enormous scarred figure who becomes twice as dangerous when wounded.',
+      special: { type:'enrage_below_hp', threshold:40, doublesAttacks:true } },
+    { id:'executioner',  tier:4, name:"The Court's Executioner",hp:110,xp:210,dmgMin:20,dmgMax:27,portrait:'🪓',
+      desc:'The opening blow is unavoidable. The rest of the fight is the character answering it.',
+      special: { type:'guaranteed_open', openDmg:30 } },
+    { id:'nightcaller',  tier:4, name:'Nightcaller',     hp:100, xp:215, dmgMin:15, dmgMax:22, portrait:'🌑',
+      desc:'A shadowy opponent who learns your patterns. Forces variety — you cannot spam a single ability.',
+      special: { type:'stun_repeat_action' } },
+
+    /* ── Tier 5 ── (available at level 6, escalation only) */
+    { id:'pale_commander',tier:5,name:'The Pale Commander',hp:170,xp:320,dmgMin:22,dmgMax:30,portrait:'👑',
+      desc:'A cold tactician who never fights alone. The summoned Ash Hound forces you to split attention.',
+      special: { type:'summon', triggerRound:4, summonId:'ash_hound' } },
+    { id:'void_soldier',  tier:5,name:'Void-Touched Soldier',hp:160,xp:300,dmgMin:20,dmgMax:28,portrait:'🌀',
+      desc:'The Mana drain is the mechanic. Forces return to basics under pressure.',
+      special: { type:'mana_drain', drainPerRound:8 } },
+    { id:'last_warden',   tier:5,name:'The Last Warden',  hp:180,xp:350,dmgMin:23,dmgMax:32,portrait:'🏰',
+      desc:'A legendary defender of a fallen keep. The phase transition resets the fight halfway through.',
+      special: { type:'two_phase', phaseHp:90 } },
+    { id:'mireborn',      tier:5,name:'Mireborn Ancient', hp:200,xp:400,dmgMin:25,dmgMax:35,portrait:'🐉',
+      desc:'A creature old enough to have seen the Reaches before they were broken. Only raw stats and active abilities survive.',
+      special: { type:'ignore_passive_reduction' } }
+  ];
+
+  /* ── Encounter atmospheric scenes ──────────────────────── */
+  var ENCOUNTER_SCENES = [
+    'The road narrows here. Something moves in the grey ahead.',
+    'A shape detaches itself from the fog. It has noticed you.',
+    'The cold deepens. Whatever is ahead has been waiting.',
+    'You have seen its kind before. That does not make it easier.',
+    'The silence before this kind of thing always feels the same.',
+    'Something has been following the road. Now it has stopped.',
+    'The light does not reach as far as it should here.',
+    'You came looking. You found.'
+  ];
+
+  /* ── Victory / defeat passages ──────────────────────────── */
+  var VICTORY_PASSAGES = [
+    'It is down. You are still standing. That is the difference.',
+    'The road is clear again — for now.',
+    'Whatever it was, it is not a threat anymore.',
+    'You did not come out of that unscathed. But you came out.',
+    'The Reaches took note. Not with praise. Just note.'
+  ];
+
+  var DEFEAT_PASSAGES = [
+    'The ground is closer than you expected. The fight is over.',
+    'Not everything out here loses to you. Today you learned that.',
+    'It was stronger than you were ready for. Come back better.',
+    'The road will still be here tomorrow. So will you, barely.',
+    'Defeat is information. Use it.'
+  ];
+
+  /* ── Combat state ───────────────────────────────────────── */
+  var CS = {
+    active:      false,
+    monster:     null,
+    monsterHp:   0,
+    playerHp:    0,
+    playerMaxHp: 0,
+    mana:        0,
+    maxMana:     0,
+    round:       1,
+    readBonus:   false,       /* true after Read the Enemy */
+    enduring:    false,       /* true if player chose Endure this round */
+    poisonRounds:0,           /* rounds of poison remaining */
+    poisonDmg:   0,
+    stunned:     false,       /* monster self-stun (Ashfield Revenant) */
+    playerStunned: false,     /* player stunned (Nightcaller) */
+    lastAction:  null,        /* for Nightcaller repeat-action detection */
+    enraged:     false,       /* Veldrath phase */
+    phase2:      false,       /* Last Warden phase 2 */
+    openingDone: false,       /* Executioner guaranteed open */
+    encountersToday: 0,       /* escalation counter */
+    injuredToday: false,
+    ventureBlocked: false
+  };
+
+  /* ── D20 roll ────────────────────────────────────────────── */
+  function d20() { return Math.floor(Math.random() * 20) + 1; }
+  function randBetween(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  /* ── Select appropriate monster ─────────────────────────── */
+  function selectMonster(data) {
+    var level = data.character.level || 1;
+    /* Tier availability per level */
+    var maxTier = level >= 6 ? 5 : level >= 4 ? 3 : level >= 2 ? 2 : 1;
+
+    /* Escalation: each victory today pushes tier up by 1 */
+    var escalation = CS.encountersToday;
+    var targetTier = Math.min(5, Math.max(1, maxTier - (maxTier - 1) + escalation));
+    /* Simpler: base = 1, escalation adds tiers, cap at maxTier */
+    targetTier = Math.min(maxTier, 1 + escalation);
+
+    var pool = MONSTERS.filter(function(m) { return m.tier === targetTier; });
+    if (!pool.length) pool = MONSTERS.filter(function(m) { return m.tier === 1; });
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  /* ── Open Venture Out (encounter preview) ─────────────── */
+  function openVentureOut() {
+    var data = loadData();
+    if (!data) return;
+
+    /* Check if blocked from injury */
+    if (data.combat && data.combat.ventureBlockedDate === new Date().toISOString().slice(0,10)) {
+      addCombatLog('Venture Out is unavailable today. Return tomorrow.', 'system-note');
+      return;
+    }
+
+    /* Ensure combat state exists on data */
+    if (!data.combat) {
+      data.combat = { ventureBlockedDate: null, encountersToday: 0, lastEncounterDate: null };
+    }
+
+    /* Reset daily counter if new day */
+    var today = new Date().toISOString().slice(0,10);
+    if (data.combat.lastEncounterDate !== today) {
+      data.combat.encountersToday = 0;
+      data.combat.lastEncounterDate = today;
+    }
+
+    CS.encountersToday = data.combat.encountersToday || 0;
+
+    var monster = selectMonster(data);
+    CS.monster = monster;
+
+    /* Populate encounter preview */
+    var scene = ENCOUNTER_SCENES[Math.floor(Math.random() * ENCOUNTER_SCENES.length)];
+    document.getElementById('encounter-scene-text').textContent = scene;
+    document.getElementById('encounter-portrait').textContent   = monster.portrait;
+    document.getElementById('encounter-tier-label').textContent = 'Tier ' + monster.tier;
+    document.getElementById('encounter-name').textContent       = monster.name;
+    document.getElementById('encounter-desc').textContent       = monster.desc;
+    document.getElementById('encounter-hp').textContent         = monster.hp;
+    document.getElementById('encounter-dmg').textContent        = monster.dmgMin + '–' + monster.dmgMax;
+    document.getElementById('encounter-xp').textContent         = monster.xp + ' XP';
+
+    document.getElementById('encounterOverlay').classList.add('visible');
+  }
+
+  function withdrawEncounter() {
+    document.getElementById('encounterOverlay').classList.remove('visible');
+  }
+
+  /* ── Start combat ────────────────────────────────────────── */
+  function startCombat() {
+    var data = loadData();
+    if (!data) return;
+
+    document.getElementById('encounterOverlay').classList.remove('visible');
+
+    /* Init combat state */
+    var level   = data.character.level || 1;
+    var coreStat = data.stats.core || 0;
+    var maxHp   = (level * 10) + Math.floor(coreStat / 10 * 5) + 40;
+    var curHp   = data.character.hp != null ? data.character.hp : maxHp;
+    /* Use current HP — doesn't restore between combats until day reset */
+
+    var resolveStat = data.stats.resolve || 0;
+    var maxMana  = 30 + Math.floor(resolveStat / 10 * 5) + (level * 3);
+    var curMana  = data.character.mana || 0;
+
+    CS.active       = true;
+    CS.monsterHp    = CS.monster.hp;
+    CS.playerHp     = curHp;
+    CS.playerMaxHp  = maxHp;
+    CS.mana         = curMana;
+    CS.maxMana      = maxMana;
+    CS.round        = 1;
+    CS.readBonus    = false;
+    CS.enduring     = false;
+    CS.poisonRounds = 0;
+    CS.poisonDmg    = 0;
+    CS.stunned      = false;
+    CS.playerStunned = false;
+    CS.lastAction   = null;
+    CS.enraged      = false;
+    CS.phase2       = false;
+    CS.openingDone  = false;
+
+    /* Executioner guaranteed opening blow */
+    if (CS.monster.special && CS.monster.special.type === 'guaranteed_open') {
+      CS.openingDone = false; /* will fire on round 1 monster turn */
+    }
+
+    /* Populate combat UI */
+    document.getElementById('combat-round-num').textContent      = 1;
+    document.getElementById('combat-player-name').textContent    = data.warrior.name;
+    document.getElementById('combat-monster-name').textContent   = CS.monster.name;
+    document.getElementById('combat-monster-tier-label').textContent = 'Tier ' + CS.monster.tier;
+    document.getElementById('combat-monster-portrait').textContent = CS.monster.portrait;
+
+    updateCombatBars();
+    renderCombatManaPips();
+
+    var logEl = document.getElementById('combat-log');
+    logEl.innerHTML = '';
+    addCombatLog('You face ' + CS.monster.name + '. The road narrows.', 'system-note');
+
+    enableCombatButtons();
+    document.getElementById('combatOverlay').classList.add('visible');
+  }
+
+  /* ── Update HP bars ──────────────────────────────────────── */
+  function updateCombatBars() {
+    var pPct = Math.max(0, Math.round(CS.playerHp / CS.playerMaxHp * 100));
+    var mPct = Math.max(0, Math.round(CS.monsterHp / CS.monster.hp * 100));
+
+    document.getElementById('combat-player-hp').textContent = Math.max(0, CS.playerHp);
+    document.getElementById('combat-player-maxhp').textContent = CS.playerMaxHp;
+    document.getElementById('combat-monster-hp').textContent = Math.max(0, CS.monsterHp);
+    document.getElementById('combat-monster-maxhp').textContent = CS.monster.hp;
+
+    var pBar = document.getElementById('combat-player-hp-bar');
+    pBar.style.width = pPct + '%';
+    pBar.classList.toggle('danger', pPct <= 25);
+
+    document.getElementById('combat-monster-hp-bar').style.width = mPct + '%';
+  }
+
+  function renderCombatManaPips() {
+    var container = document.getElementById('combat-mana-pips');
+    container.innerHTML = '';
+    var show = Math.min(CS.maxMana, 33); /* show up to 33 pips */
+    for (var i = 0; i < show; i++) {
+      var pip = document.createElement('div');
+      pip.className = 'combat-mana-pip' + (i < CS.mana ? ' filled' : '');
+      container.appendChild(pip);
+    }
+  }
+
+  /* ── Combat log helper ────────────────────────────────────── */
+  function addCombatLog(text, cls) {
+    var logEl = document.getElementById('combat-log');
+    var line  = document.createElement('div');
+    line.className = 'combat-log-line' + (cls ? ' ' + cls : '');
+    line.textContent = text;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  /* ── Enable / disable action buttons ─────────────────────── */
+  function enableCombatButtons() {
+    ['strike','endure','read'].forEach(function(a) {
+      document.getElementById('btn-' + a).disabled = false;
+    });
+    /* Primed indicator for Read bonus */
+    document.getElementById('btn-strike').classList.toggle('primed', CS.readBonus);
+  }
+
+  function disableCombatButtons() {
+    ['strike','endure','read'].forEach(function(a) {
+      document.getElementById('btn-' + a).disabled = true;
+    });
+  }
+
+  /* ── Calculate player damage (Strike) ───────────────────── */
+  function calcPlayerDamage(data) {
+    var force = data.stats.force || 0;
+    var roll  = d20();
+    /* Base damage: 5–15 scaled by Force */
+    var base  = 5 + Math.floor(force / 10 * 5);
+    /* D20 modifier: roll 15+ = +4, roll 5- = -2 */
+    var mod   = roll >= 15 ? 4 : roll <= 5 ? -2 : 0;
+    var dmg   = Math.max(1, base + mod);
+    if (CS.readBonus) { dmg = Math.round(dmg * 1.3); }
+    /* Hollow Knight damage reduction */
+    if (CS.monster.special && CS.monster.special.type === 'damage_reduction') {
+      dmg = Math.max(1, dmg - CS.monster.special.flat);
+    }
+    /* Thornback reflect */
+    if (CS.monster.special && CS.monster.special.type === 'reflect') {
+      CS.playerHp -= CS.monster.special.reflectDmg;
+      addCombatLog('The carapace reflects ' + CS.monster.special.reflectDmg + ' damage back at you.', 'monster-action');
+    }
+    return { dmg: dmg, roll: roll };
+  }
+
+  /* ── Calculate monster damage ────────────────────────────── */
+  function calcMonsterDamage() {
+    var m   = CS.monster;
+    var dmg = randBetween(m.dmgMin, m.dmgMax);
+
+    /* Endure reduces incoming damage by (Endurance+Core)/20, min 20% reduction */
+    if (CS.enduring) {
+      dmg = Math.max(1, Math.round(dmg * 0.55));
+    }
+
+    /* Surge (Ironwood Stalker round 4) */
+    if (m.special && m.special.type === 'surge' && CS.round === m.special.triggerRound) {
+      dmg = Math.round(dmg * m.special.multiplier);
+      addCombatLog(m.name + ' surges — damage amplified this round!', 'monster-action');
+    }
+
+    /* Alternating (Candle Wraith) */
+    if (m.special && m.special.type === 'alternating') {
+      dmg = (CS.round % 2 === 0) ? m.special.heavyDmg : m.special.lightDmg;
+      if (CS.enduring && CS.round % 2 === 0) dmg = Math.max(1, Math.round(dmg * 0.55));
+    }
+
+    /* Escalating rage (Grey Reaver) */
+    if (m.special && m.special.type === 'escalating_rage' && CS.round >= m.special.startRound) {
+      var bonus = (CS.round - m.special.startRound + 1) * m.special.bonusPerRound;
+      dmg += bonus;
+    }
+
+    /* Enraged Veldrath (below threshold HP) */
+    if (CS.enraged) { dmg = dmg * 2; }
+
+    /* Shield round (Warden) — no damage to player when monster is shielding */
+    if (m.special && m.special.type === 'shield_round' && CS.round === m.special.triggerRound) {
+      addCombatLog(m.name + ' raises its shield — you cannot damage it this round.', 'monster-action');
+      return -1; /* flag: monster blocks player this round but also does no damage */
+    }
+
+    return dmg;
+  }
+
+  /* ── Main combat action handler ──────────────────────────── */
+  function combatAction(action) {
+    if (!CS.active) return;
+    var data = loadData();
+    if (!data) return;
+
+    disableCombatButtons();
+
+    /* Nightcaller stun on repeated action */
+    if (CS.monster.id === 'nightcaller' && CS.lastAction === action) {
+      CS.playerStunned = true;
+      addCombatLog(CS.monster.name + ' anticipated your pattern. You are stunned for this round.', 'monster-action');
+    }
+
+    CS.lastAction = action;
+    CS.enduring   = false;
+    CS.readBonus  = false;
+
+    /* ── Player turn ── */
+    if (!CS.playerStunned) {
+      if (action === 'strike') {
+        var result = calcPlayerDamage(data);
+        /* Shield round blocks damage */
+        if (CS.monster.special && CS.monster.special.type === 'shield_round' && CS.round === CS.monster.special.triggerRound) {
+          addCombatLog('Your strike glances off the raised shield. No damage.', 'player-action');
+        } else if (!CS.stunned) {
+          CS.monsterHp -= result.dmg;
+          var hitVerb = result.roll >= 15 ? 'lands hard' : result.roll <= 5 ? 'grazes' : 'connects';
+          addCombatLog('You strike — the blow ' + hitVerb + ' for ' + result.dmg + ' damage. (Roll: ' + result.roll + ')', 'player-action');
+
+          /* Animate monster */
+          var portrait = document.getElementById('combat-monster-portrait');
+          portrait.classList.remove('struck');
+          void portrait.offsetWidth;
+          portrait.classList.add('struck');
+
+          /* Ashfield Revenant — stun self on big hit */
+          if (CS.monster.special && CS.monster.special.type === 'stun_on_big_hit' && result.dmg >= CS.monster.special.threshold) {
+            CS.stunned = true;
+            addCombatLog(CS.monster.name + ' staggers — stunned for one round from the heavy blow.', 'system-note');
+          }
+
+          /* Last Warden phase 2 transition */
+          if (CS.monster.id === 'last_warden' && !CS.phase2 && CS.monsterHp <= CS.monster.special.phaseHp) {
+            CS.phase2   = true;
+            CS.monsterHp = CS.monster.special.phaseHp; /* full heal to phase 2 HP */
+            addCombatLog('The Last Warden rises again — Phase 2 begins. Full HP restored to ' + CS.monster.special.phaseHp + '.', 'system-note');
+          }
+        } else {
+          addCombatLog('The monster is stunned — your strike connects freely for ' + result.dmg + ' damage.', 'player-action');
+          CS.monsterHp -= result.dmg;
+          CS.stunned = false;
+        }
+
+      } else if (action === 'endure') {
+        CS.enduring = true;
+        addCombatLog('You brace and endure — incoming damage reduced this round.', 'player-action');
+
+      } else if (action === 'read') {
+        CS.readBonus = true;
+        addCombatLog('You read the enemy — accuracy bonus applied to your next Strike.', 'player-action');
+      }
+    } else {
+      CS.playerStunned = false;
+    }
+
+    updateCombatBars();
+
+    /* Check monster death */
+    if (CS.monsterHp <= 0) {
+      resolveVictory(data);
+      return;
+    }
+
+    /* ── Monster turn ── */
+    setTimeout(function() {
+      executeMonsterTurn(data);
+    }, 600);
+  }
+
+  /* ── Monster turn ──────────────────────────────────────────── */
+  function executeMonsterTurn(data) {
+    var m = CS.monster;
+
+    /* Marshwalker heal */
+    if (m.special && m.special.type === 'heal' && CS.round === m.special.triggerRound) {
+      CS.monsterHp = Math.min(m.hp, CS.monsterHp + m.special.amount);
+      addCombatLog(m.name + ' recovers — HP restored by ' + m.special.amount + '.', 'monster-action');
+      updateCombatBars();
+    }
+
+    /* Fog Crow double strike round 2 */
+    if (m.special && m.special.type === 'double_strike' && CS.round === m.special.triggerRound) {
+      var dmg1 = randBetween(m.dmgMin, m.dmgMax);
+      var dmg2 = randBetween(m.dmgMin, m.dmgMax);
+      if (CS.enduring) { dmg1 = Math.max(1, Math.round(dmg1 * 0.55)); dmg2 = Math.max(1, Math.round(dmg2 * 0.55)); }
+      CS.playerHp -= (dmg1 + dmg2);
+      addCombatLog(m.name + ' strikes twice — ' + dmg1 + ' and ' + dmg2 + ' damage.', 'monster-action');
+    } else {
+      /* Standard monster attack */
+      var monDmg = calcMonsterDamage();
+
+      /* Executioner guaranteed open on round 1 */
+      if (m.special && m.special.type === 'guaranteed_open' && !CS.openingDone) {
+        monDmg = m.special.openDmg;
+        CS.openingDone = true;
+        addCombatLog(m.name + ' opens with a guaranteed ' + monDmg + '-damage strike — unavoidable.', 'monster-action');
+      }
+
+      if (monDmg === -1) {
+        /* Shield round: monster defended — no damage */
+      } else if (monDmg > 0) {
+        CS.playerHp -= monDmg;
+        var playerPortrait = document.getElementById('combat-player-portrait');
+        playerPortrait.classList.remove('struck');
+        void playerPortrait.offsetWidth;
+        playerPortrait.classList.add('struck');
+        addCombatLog(m.name + ' attacks for ' + monDmg + ' damage.', 'monster-action');
+      }
+    }
+
+    /* Poison tick */
+    if (CS.poisonRounds > 0) {
+      CS.playerHp -= CS.poisonDmg;
+      CS.poisonRounds--;
+      addCombatLog('Poison burns for ' + CS.poisonDmg + ' damage. (' + CS.poisonRounds + ' rounds remaining)', 'monster-action');
+    }
+
+    /* Iron Widow — apply poison on trigger round */
+    if (m.special && m.special.type === 'poison' && CS.round === m.special.triggerRound && CS.poisonRounds === 0) {
+      CS.poisonRounds = m.special.duration;
+      CS.poisonDmg    = m.special.dmgPerRound;
+      addCombatLog(m.name + ' poisons you — ' + CS.poisonDmg + ' damage per round for ' + CS.poisonRounds + ' rounds.', 'monster-action');
+    }
+
+    /* Void-Touched Soldier — drain mana per round */
+    if (m.special && m.special.type === 'mana_drain') {
+      var drain = Math.min(CS.mana, m.special.drainPerRound);
+      CS.mana  = Math.max(0, CS.mana - drain);
+      renderCombatManaPips();
+      if (drain > 0) addCombatLog(m.name + ' drains ' + drain + ' Mana.', 'monster-action');
+    }
+
+    /* Veldrath enrage check */
+    if (m.id === 'veldrath' && !CS.enraged && CS.monsterHp <= m.special.threshold) {
+      CS.enraged = true;
+      addCombatLog('Veldrath roars — enraged below ' + m.special.threshold + ' HP. Damage doubled!', 'monster-action');
+    }
+
+    updateCombatBars();
+    renderCombatManaPips();
+
+    /* Check player death */
+    if (CS.playerHp <= 0) {
+      resolveDefeat(data);
+      return;
+    }
+
+    /* Next round */
+    CS.round++;
+    document.getElementById('combat-round-num').textContent = CS.round;
+    enableCombatButtons();
+  }
+
+  /* ── Victory ─────────────────────────────────────────────── */
+  function resolveVictory(data) {
+    CS.active = false;
+    CS.monsterHp = 0;
+    updateCombatBars();
+
+    /* XP award */
+    var xpGain = CS.monster.xp;
+    var level  = data.character.level || 1;
+    /* Bonus XP if monster tier > player level */
+    if (CS.monster.tier > level) xpGain = Math.round(xpGain * 1.25);
+    /* Reduced XP if monster tier significantly below player */
+    if (CS.monster.tier < level - 1) xpGain = Math.round(xpGain * 0.5);
+
+    data.character.xp  = (data.character.xp || 0) + xpGain;
+    data.character.hp  = Math.max(1, CS.playerHp); /* persist current HP */
+
+    /* Save encounter count */
+    if (!data.combat) data.combat = {};
+    data.combat.encountersToday   = (CS.encountersToday || 0) + 1;
+    data.combat.lastEncounterDate = new Date().toISOString().slice(0,10);
+    CS.encountersToday = data.combat.encountersToday;
+
+    /* Update XP bar on home screen */
+    var xpThresholds = [0,200,500,900,1400,2000,2700,3500,4400,5400];
+    var lvl = data.character.level || 1;
+    var xpNeeded = xpThresholds[Math.min(lvl, xpThresholds.length - 1)];
+    var xpCurrent = data.character.xp;
+
+    saveData(data);
+    populateHomeScreen(data);
+
+    /* Close combat */
+    document.getElementById('combatOverlay').classList.remove('visible');
+
+    /* Show result */
+    var passage = VICTORY_PASSAGES[Math.floor(Math.random() * VICTORY_PASSAGES.length)];
+    document.getElementById('result-icon').textContent    = '⚔️';
+    document.getElementById('result-title').textContent   = 'Victory';
+    document.getElementById('result-xp').style.display   = 'block';
+    document.getElementById('result-xp').innerHTML       = '+' + xpGain + ' XP <span>earned</span>';
+    document.getElementById('result-injury-notice').style.display = 'none';
+    document.getElementById('result-passage').textContent = '"' + passage + '"';
+    document.getElementById('combatResultOverlay').classList.add('visible');
+  }
+
+  /* ── Defeat ──────────────────────────────────────────────── */
+  function resolveDefeat(data) {
+    CS.active    = false;
+    CS.playerHp  = 0;
+    updateCombatBars();
+
+    /* Block Venture Out for rest of day, reset HP for tomorrow */
+    if (!data.combat) data.combat = {};
+    var today = new Date().toISOString().slice(0,10);
+    data.combat.ventureBlockedDate = today;
+    data.character.hp = data.character.maxHp || CS.playerMaxHp; /* reset for tomorrow */
+    saveData(data);
+    populateHomeScreen(data);
+
+    document.getElementById('combatOverlay').classList.remove('visible');
+
+    var passage = DEFEAT_PASSAGES[Math.floor(Math.random() * DEFEAT_PASSAGES.length)];
+    document.getElementById('result-icon').textContent     = '💀';
+    document.getElementById('result-title').textContent    = 'Defeated';
+    document.getElementById('result-xp').style.display    = 'none';
+    document.getElementById('result-injury-notice').style.display = 'block';
+    document.getElementById('result-passage').textContent = '"' + passage + '"';
+    document.getElementById('combatResultOverlay').classList.add('visible');
+  }
+
+  /* ── Close result screen ─────────────────────────────────── */
+  function closeCombatResult() {
+    document.getElementById('combatResultOverlay').classList.remove('visible');
+  }
+
+  /* ── Wire Venture Out button ─────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', function() {
+    var btns = document.querySelectorAll('.action-btn');
+    /* btns[0] = Log Training (wired in Phase 3), btns[1] = Venture Out */
+    if (btns[1]) btns[1].addEventListener('click', function() {
+      var data = loadData();
+      if (data && data.setupComplete) {
+        /* Check if venture is blocked today */
+        var today = new Date().toISOString().slice(0,10);
+        if (data.combat && data.combat.ventureBlockedDate === today) {
+          alert('You are injured. Venture Out returns tomorrow.');
+          return;
+        }
+        openVentureOut();
+      }
+    });
+  });
+
+  /* ── Update home screen XP bar from data ─────────────────── */
+  /* (populateHomeScreen already handles this in Phase 1–2 code) */
+  /* We need to make sure XP bar is wired. Patch populateHomeScreen: */
+  var _origPopulateHome = populateHomeScreen;
+  populateHomeScreen = function(data) {
+    _origPopulateHome(data);
+    /* XP bar update */
+    var xpThresholds = [200, 500, 900, 1400, 2000, 2700, 3500, 4400, 5400, 99999];
+    var lvl      = (data.character.level || 1) - 1;
+    var prevXp   = lvl > 0 ? [0,200,500,900,1400,2000,2700,3500,4400][lvl] : 0;
+    var nextXp   = xpThresholds[Math.min(lvl, xpThresholds.length - 1)];
+    var curXp    = data.character.xp || 0;
+    var xpRange  = nextXp - prevXp;
+    var xpIntoLvl = curXp - prevXp;
+    var pct      = xpRange > 0 ? Math.min(100, Math.round(xpIntoLvl / xpRange * 100)) : 0;
+
+    var xpFill  = document.querySelector('.xp-bar-fill');
+    var xpLabel = document.querySelector('.xp-label');
+    var xpVal   = document.querySelector('.xp-bar-wrap .meta-value');
+    if (xpFill)  xpFill.style.width = pct + '%';
+    if (xpLabel) xpLabel.textContent = 'Next Level: ' + (nextXp - curXp) + ' XP required';
+    if (xpVal)   xpVal.textContent   = curXp + ' / ' + nextXp + ' XP';
+  };
+
 
 
 </script>
