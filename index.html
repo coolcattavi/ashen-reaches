@@ -344,7 +344,33 @@
         linear-gradient(165deg, #0e0d0c 0%, #1a1614 20%, #2a2218 35%, #1e1a14 50%, #140f0a 65%, #0a0908 85%, #060504 100%);
       background-size: cover, cover, cover;
       background-position: center;
+      transition: background-image 1.2s ease, opacity 1.2s ease;
+      position: relative;
     }
+
+    /* When a real image is loaded, it sits under the vignette */
+    .hero-image.has-image {
+      background:
+        linear-gradient(to bottom, var(--ash) 0%, transparent 22%, transparent 55%, var(--ash) 100%),
+        linear-gradient(to right,  var(--ash) 0%, transparent 10%, transparent 90%, var(--ash) 100%),
+        var(--world-image, none);
+      background-size: cover, cover, cover;
+      background-position: center, center, center;
+    }
+
+    /* Stage-based darkening overlay — controlled by JS via CSS variable */
+    .hero-image::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(0,0,0, var(--stage-darkness, 0));
+      transition: background 2s ease;
+      pointer-events: none;
+    }
+
+    /* Absence-tier overlay — additional darkening on top */
+    .hero-image.absence-tier-1::after { --stage-darkness: 0.15; }
+    .hero-image.absence-tier-2::after { --stage-darkness: 0.30; }
+    .hero-image.absence-tier-3::after { --stage-darkness: 0.50; }
 
     .hero-scene { position: absolute; inset: 0; overflow: hidden; }
 
@@ -2233,6 +2259,618 @@
     }
 
 
+    /* ════════════════════════════════════════════════════════════
+       PHASE 9 — ORDAINED BATTLE SCREENS
+    ════════════════════════════════════════════════════════════ */
+
+    #ordainedOverlay {
+      position: fixed; inset: 0;
+      background: var(--ash);
+      z-index: 620;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+      animation: fadeIn 0.6s ease;
+    }
+
+    #ordainedOverlay.visible { display: flex; }
+
+    .ordained-shell {
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 48px 28px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ── Scene header ─────────────────────────────────────── */
+    .ordained-eyebrow {
+      font-size: 0.58rem;
+      letter-spacing: 0.55em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .ordained-title {
+      font-family: 'IM Fell English', serif;
+      font-size: 2.2rem;
+      color: var(--parchment);
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+
+    .ordained-subtitle {
+      font-size: 0.6rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    /* ── Narrative passage ────────────────────────────────── */
+    .ordained-passage {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.95rem;
+      color: var(--ironstone);
+      line-height: 1.9;
+      text-align: center;
+      padding: 28px 32px;
+      background:
+        linear-gradient(135deg, #2a2418 25%, transparent 25%) -6px 0,
+        linear-gradient(225deg, #2a2418 25%, transparent 25%) -6px 0,
+        linear-gradient(315deg, #2a2418 25%, transparent 25%),
+        linear-gradient(45deg,  #2a2418 25%, transparent 25%);
+      background-size: 12px 12px;
+      background-color: #231e17;
+      border-top: 1px solid rgba(74,82,64,0.3);
+      border-bottom: 1px solid rgba(74,82,64,0.3);
+      margin-bottom: 36px;
+    }
+
+    /* ── Section heading ──────────────────────────────────── */
+    .ordained-section-heading {
+      font-size: 0.6rem;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .ordained-section-sub {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.8rem;
+      color: var(--ironstone-dim);
+      text-align: center;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    /* ── Branch cards ─────────────────────────────────────── */
+    .ordained-branches {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .ordained-branch-card {
+      padding: 20px 22px;
+      background: #1e1b18;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+
+    .ordained-branch-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0; width: 2px;
+      background: var(--ironstone-dim);
+      transition: background 0.15s;
+    }
+
+    .ordained-branch-card:hover {
+      background: #252118;
+      border-color: var(--ironstone);
+    }
+
+    .ordained-branch-card.selected {
+      background: rgba(196,92,26,0.07);
+      border-color: rgba(196,92,26,0.5);
+    }
+
+    .ordained-branch-card.selected::before { background: var(--ember); }
+
+    .ordained-branch-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--bone);
+      margin-bottom: 6px;
+    }
+
+    .ordained-branch-desc {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.85rem;
+      color: var(--ironstone);
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+
+    .ordained-branch-rewards {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ordained-reward-chip {
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      color: var(--ironstone);
+      padding: 3px 8px;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 10px;
+    }
+
+    .ordained-reward-chip.highlight {
+      color: var(--ember);
+      border-color: rgba(196,92,26,0.35);
+    }
+
+    /* ── Confirm footer ───────────────────────────────────── */
+    .ordained-footer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ordained-commit-btn {
+      padding: 14px 44px;
+      background: linear-gradient(135deg, var(--leather-edge), var(--leather-dark));
+      border: 1px solid rgba(196,92,26,0.4);
+      border-radius: 2px;
+      color: var(--ember);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: background 0.2s, border-color 0.2s;
+      display: none;
+    }
+
+    .ordained-commit-btn::before {
+      content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 2px;
+      background: var(--ember);
+    }
+
+    .ordained-commit-btn:hover {
+      background: linear-gradient(135deg, #382818, #1e1208);
+      border-color: rgba(196,92,26,0.7);
+    }
+
+    .ordained-commit-btn.visible { display: block; }
+
+    .ordained-back-btn {
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--ironstone-dim);
+      background: none; border: none; cursor: pointer; padding: 0;
+      text-decoration: underline; text-underline-offset: 3px;
+      transition: color 0.2s;
+    }
+
+    .ordained-back-btn:hover { color: var(--ironstone); }
+
+    /* ── Result screen ────────────────────────────────────── */
+    #ordainedResultOverlay {
+      position: fixed; inset: 0;
+      background: var(--ash);
+      z-index: 630;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.5s ease;
+    }
+
+    #ordainedResultOverlay.visible { display: flex; }
+
+    .ordained-result-shell {
+      width: 100%;
+      max-width: 520px;
+      padding: 0 28px;
+      text-align: center;
+    }
+
+    .ordained-result-icon { font-size: 2.5rem; margin-bottom: 16px; }
+
+    .ordained-result-title {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.8rem;
+      color: var(--parchment);
+      margin-bottom: 8px;
+    }
+
+    .ordained-result-race {
+      font-size: 0.6rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      margin-bottom: 24px;
+    }
+
+    .ordained-result-divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--ironstone-dim), transparent);
+      margin-bottom: 24px;
+    }
+
+    .ordained-result-rewards {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .ordained-result-reward-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 14px;
+      background: #1e1b18;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+    }
+
+    .ordained-result-reward-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+    }
+
+    .ordained-result-reward-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ember);
+    }
+
+    .ordained-result-passage {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--ironstone);
+      line-height: 1.75;
+      margin-bottom: 28px;
+    }
+
+    .ordained-result-ability {
+      padding: 12px 16px;
+      background: rgba(196,92,26,0.06);
+      border: 1px solid rgba(196,92,26,0.25);
+      border-radius: 2px;
+      margin-bottom: 24px;
+    }
+
+    .ordained-result-ability-label {
+      font-size: 0.58rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      margin-bottom: 4px;
+    }
+
+    .ordained-result-ability-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ember);
+    }
+
+    .ordained-result-ability-effect {
+      font-size: 0.65rem;
+      color: var(--ironstone);
+      margin-top: 3px;
+      letter-spacing: 0.05em;
+    }
+
+    .ordained-result-return-btn {
+      display: block; width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--leather-edge), var(--leather-dark));
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .ordained-result-return-btn:hover {
+      border-color: rgba(196,92,26,0.5);
+      background: linear-gradient(135deg, #382818, #1e1208);
+    }
+
+    /* ── The World button state — locked before race date ─── */
+    .action-btn.race-locked .btn-sub { color: var(--ironstone-dim); }
+    .action-btn.race-available .btn-title { color: var(--ember); }
+
+    /* ════════════════════════════════════════════════════════════
+       PHASE 10 — THE RECORD & EXPORT
+    ════════════════════════════════════════════════════════════ */
+
+    #recordOverlay {
+      position: fixed; inset: 0;
+      background: var(--ash);
+      z-index: 410;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: fadeIn 0.4s ease;
+    }
+
+    #recordOverlay.visible { display: flex; }
+
+    /* ── Record header ───────────────────────────────────── */
+    .record-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--ironstone-dim);
+      flex-shrink: 0;
+      background: #131110;
+    }
+
+    .record-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .record-eyebrow {
+      font-size: 0.55rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+    }
+
+    .record-title-text {
+      font-family: 'IM Fell English', serif;
+      font-size: 1.25rem;
+      color: var(--parchment);
+      line-height: 1;
+    }
+
+    .record-close-btn {
+      background: none;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--ironstone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .record-close-btn:hover { color: var(--bone); border-color: var(--ironstone); }
+
+    /* ── Summary stats bar ───────────────────────────────── */
+    .record-summary-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--ironstone-dim);
+      flex-shrink: 0;
+      background: #1a1714;
+    }
+
+    .record-summary-stat {
+      flex: 1;
+      padding: 10px 0;
+      text-align: center;
+      border-right: 1px solid var(--ironstone-dim);
+    }
+
+    .record-summary-stat:last-child { border-right: none; }
+
+    .record-summary-value {
+      font-size: 1.0rem;
+      font-weight: 600;
+      color: var(--bone);
+      display: block;
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+
+    .record-summary-label {
+      font-size: 0.52rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+    }
+
+    /* ── Scrollable log list ─────────────────────────────── */
+    .record-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--ironstone-dim) transparent;
+    }
+
+    .record-empty {
+      padding: 60px 24px;
+      text-align: center;
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--ironstone);
+    }
+
+    /* ── Log entry row ───────────────────────────────────── */
+    .record-entry {
+      border-bottom: 1px solid var(--ironstone-dim);
+    }
+
+    .record-entry-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 24px;
+      cursor: pointer;
+      background: #1a1714;
+      transition: background 0.15s;
+      user-select: none;
+    }
+
+    .record-entry-header:hover { background: #201d18; }
+
+    .record-entry-date {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--bone);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      width: 96px;
+      flex-shrink: 0;
+    }
+
+    .record-entry-type {
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+      padding: 2px 7px;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .record-entry-summary {
+      flex: 1;
+      font-size: 0.68rem;
+      color: var(--ironstone);
+      letter-spacing: 0.03em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .record-entry-chevron {
+      font-size: 0.6rem;
+      color: var(--ironstone-dim);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .record-entry-header.open .record-entry-chevron { transform: rotate(180deg); }
+
+    /* ── Expanded detail ─────────────────────────────────── */
+    .record-entry-detail {
+      display: none;
+      padding: 12px 24px 16px 134px; /* left-indent past date + type */
+      background: #131110;
+      border-top: 1px solid var(--ironstone-dim);
+    }
+
+    .record-entry-detail.open { display: block; }
+
+    .record-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .record-detail-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .record-detail-label {
+      font-size: 0.52rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ironstone-dim);
+    }
+
+    .record-detail-value {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--bone);
+    }
+
+    .record-detail-value.positive { color: var(--ember); }
+
+    /* ── Export footer ───────────────────────────────────── */
+    .record-footer {
+      padding: 12px 24px;
+      border-top: 1px solid var(--ironstone-dim);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      background: #131110;
+    }
+
+    .record-count {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ironstone);
+    }
+
+    .export-btn {
+      padding: 8px 20px;
+      background: linear-gradient(135deg, var(--leather-edge), var(--leather-dark));
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      color: var(--bone);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .export-btn::before {
+      content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 2px;
+      background: var(--ironstone-dim); transition: background 0.15s;
+    }
+
+    .export-btn:hover { border-color: var(--ironstone); }
+    .export-btn:hover::before { background: var(--ironstone); }
+
+
   </style>
 </head>
 <body>
@@ -2416,6 +3054,62 @@
 
 
 <!-- ══════════════════════════════════════════════════════════════
+     PHASE 9 — ORDAINED BATTLE OVERLAY
+══════════════════════════════════════════════════════════════ -->
+<div id="ordainedOverlay">
+  <div class="ordained-shell">
+
+    <p class="ordained-eyebrow" id="ordained-eyebrow">Ordained Battle</p>
+    <div class="ordained-title" id="ordained-title">—</div>
+    <div class="ordained-subtitle" id="ordained-subtitle">—</div>
+
+    <div class="ordained-passage" id="ordained-passage">—</div>
+
+    <div class="ordained-section-heading">Choose Your Branch</div>
+    <div class="ordained-section-sub">
+      The system operates on trust. Choose the branch that is true.
+    </div>
+
+    <div class="ordained-branches" id="ordained-branches"></div>
+
+    <div class="ordained-footer">
+      <button class="ordained-commit-btn" id="ordained-commit-btn"
+              onclick="confirmOrdinedBranch()">
+        Seal the reckoning →
+      </button>
+      <button class="ordained-back-btn" onclick="closeOrdained()">
+        Not yet — return to the road
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     PHASE 9 — ORDAINED RESULT OVERLAY
+══════════════════════════════════════════════════════════════ -->
+<div id="ordainedResultOverlay">
+  <div class="ordained-result-shell">
+    <div class="ordained-result-icon" id="ordained-result-icon">⚔️</div>
+    <div class="ordained-result-title" id="ordained-result-title">—</div>
+    <div class="ordained-result-race" id="ordained-result-race">—</div>
+    <div class="ordained-result-divider"></div>
+    <div class="ordained-result-rewards" id="ordained-result-rewards"></div>
+    <div class="ordained-result-ability" id="ordained-result-ability" style="display:none;">
+      <div class="ordained-result-ability-label">Ability Unlocked</div>
+      <div class="ordained-result-ability-name" id="ordained-result-ability-name">—</div>
+      <div class="ordained-result-ability-effect" id="ordained-result-ability-effect">—</div>
+    </div>
+    <div class="ordained-result-passage" id="ordained-result-passage">—</div>
+    <button class="ordained-result-return-btn" onclick="closeOrdainedResult()">
+      Return to the road
+    </button>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
      PHASE 6 — LEVEL UP & ABILITIES TREE OVERLAY
 ══════════════════════════════════════════════════════════════ -->
 <div id="levelUpOverlay">
@@ -2575,6 +3269,54 @@
     <div class="combat-result-passage" id="result-passage">—</div>
     <button class="combat-result-btn" onclick="closeCombatResult()">Return</button>
   </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     PHASE 10 — THE RECORD OVERLAY
+══════════════════════════════════════════════════════════════ -->
+<div id="recordOverlay">
+
+  <!-- Header -->
+  <div class="record-header">
+    <div class="record-header-left">
+      <span class="record-eyebrow">Historical Log</span>
+      <span class="record-title-text">The Record</span>
+    </div>
+    <button class="record-close-btn" onclick="closeRecord()">✕ Close</button>
+  </div>
+
+  <!-- Summary bar -->
+  <div class="record-summary-bar" id="record-summary-bar">
+    <div class="record-summary-stat">
+      <span class="record-summary-value" id="rec-total-sessions">0</span>
+      <span class="record-summary-label">Sessions</span>
+    </div>
+    <div class="record-summary-stat">
+      <span class="record-summary-value" id="rec-total-days">0</span>
+      <span class="record-summary-label">Days Active</span>
+    </div>
+    <div class="record-summary-stat">
+      <span class="record-summary-value" id="rec-best-streak">0</span>
+      <span class="record-summary-label">Best Streak</span>
+    </div>
+    <div class="record-summary-stat">
+      <span class="record-summary-value" id="rec-total-xp">0</span>
+      <span class="record-summary-label">XP Earned</span>
+    </div>
+  </div>
+
+  <!-- Scrollable session list -->
+  <div class="record-body" id="record-body">
+    <div class="record-empty">No sessions logged yet. Begin.</div>
+  </div>
+
+  <!-- Export footer -->
+  <div class="record-footer">
+    <span class="record-count" id="record-count">—</span>
+    <button class="export-btn" onclick="exportData()">↓ Export Backup</button>
+  </div>
+
 </div>
 
 
@@ -3244,9 +3986,9 @@
 
 
 <script>
-  /* ════════════════════════════════════════════════════════════
+  /* ============================================================
      STORAGE
-  ════════════════════════════════════════════════════════════ */
+  ============================================================ */
   const STORAGE_KEY = 'ashenReaches_v1';
 
   function loadData() {
@@ -3260,9 +4002,9 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
 
-  /* ════════════════════════════════════════════════════════════
+  /* ============================================================
      SETUP STATE
-  ════════════════════════════════════════════════════════════ */
+  ============================================================ */
   const setupData = { name:'', origin:'', vow:'', distance:'km', weight:'kg', baseline:{hang:0,pushups:0,run:0} };
   let currentScreen = 0;
 
@@ -3390,9 +4132,9 @@
     }, 600);
   }
 
-  /* ════════════════════════════════════════════════════════════
+  /* ============================================================
      HOME SCREEN POPULATION
-  ════════════════════════════════════════════════════════════ */
+  ============================================================ */
   function populateHomeScreen(data) {
     /* Name and origin */
     document.getElementById('display-name').textContent   = data.warrior.name;
@@ -3445,9 +4187,9 @@
     else                { el.innerHTML = 'Complete <span>— Battle Available</span>'; el.style.color = 'var(--ironstone)'; }
   }
 
-  /* ════════════════════════════════════════════════════════════
+  /* ============================================================
      HELPERS
-  ════════════════════════════════════════════════════════════ */
+  ============================================================ */
   function showErr(errId, inputId) {
     document.getElementById(errId).classList.add('visible');
     document.getElementById(inputId).classList.add('error');
@@ -3459,9 +4201,9 @@
     document.getElementById(inputId).classList.remove('error');
   }
 
-  /* ════════════════════════════════════════════════════════════
+  /* ============================================================
      INIT
-  ════════════════════════════════════════════════════════════ */
+  ============================================================ */
   (function init() {
     var data = loadData();
     if (data && data.setupComplete) {
@@ -3482,11 +4224,11 @@
     /* else: setup overlay is already visible by default */
   })();
 
-  /* ════════════════════════════════════════════════════════════
+  /* ============================================================
      PHASE 3 — LOGGING SCREEN
-  ════════════════════════════════════════════════════════════ */
+  ============================================================ */
 
-  /* ── Flavour text banks ─────────────────────────────────── */
+  /* -- Flavour text banks ----------------------------------- */
   var FLAVOUR = {
     strength:    ["The weight does not care about your reasons. You moved it anyway.",
                   "Strength is not built in the moment you lift. It is built in the moment you chose to.",
@@ -3535,7 +4277,7 @@
     return '"' + bank[Math.floor(Math.random() * bank.length)] + '"';
   }
 
-  /* ── Determine Power phase by date ─────────────────────── */
+  /* -- Determine Power phase by date ----------------------- */
   function getPowerPhase() {
     var now = new Date();
     var apr1  = new Date('2025-04-01');
@@ -3545,7 +4287,7 @@
     return 1;
   }
 
-  /* ── Section toggle ─────────────────────────────────────── */
+  /* -- Section toggle --------------------------------------- */
   function toggleSection(header) {
     var body = header.nextElementSibling;
     var isOpen = header.classList.contains('open');
@@ -3553,7 +4295,7 @@
     body.classList.toggle('open', !isOpen);
   }
 
-  /* ── Repeating set rows ─────────────────────────────────── */
+  /* -- Repeating set rows ----------------------------------- */
   function addSet(containerId, prefix, unit) {
     var container = document.getElementById(containerId);
     var count = container.querySelectorAll('.set-row').length;
@@ -3592,7 +4334,7 @@
     return vals;
   }
 
-  /* ── Open the log screen ────────────────────────────────── */
+  /* -- Open the log screen ---------------------------------- */
   function openLog() {
     var data = loadData();
     if (!data) return;
@@ -3654,14 +4396,14 @@
     document.body.style.overflow = '';
   }
 
-  /* ── STAT CALCULATION ───────────────────────────────────── */
+  /* -- STAT CALCULATION ------------------------------------- */
   function calcStatDeltas(data) {
     var baseline = data.baseline || {};
     var current  = data.stats   || {};
 
     var deltas = { endurance:0, iron:0, force:0, core:0, resolve:0, lore:0 };
 
-    /* ── ENDURANCE ── */
+    /* -- ENDURANCE -- */
     var runDist = parseFloat(document.getElementById('run-distance').value) || 0;
     var bikeDur = parseFloat(document.getElementById('bike-duration').value) || 0;
     var bikeRes = parseFloat(document.getElementById('bike-resistance').value) || 0;
@@ -3679,7 +4421,7 @@
     if (burpees > 0) endPts += Math.min(burpees * (spartanOk ? 0.1 : 0.05), 5);
     deltas.endurance = parseFloat(Math.min(endPts, 25).toFixed(1));
 
-    /* ── IRON ── */
+    /* -- IRON -- */
     var hangBest = parseFloat(document.getElementById('hang-best').value) || 0;
     var pullups  = getSetValues('pullup-sets');
     var totalPullups = pullups.reduce(function(a,b){return a+b;}, 0);
@@ -3689,7 +4431,7 @@
     if (totalPullups > 0) ironPts += Math.min(totalPullups * 0.25, 8);
     deltas.iron = parseFloat(Math.min(ironPts, 20).toFixed(1));
 
-    /* ── FORCE ── */
+    /* -- FORCE -- */
     var pushups  = getSetValues('pushup-sets');
     var goblets  = getSetValues('goblet-sets');
     var squats   = getSetValues('squat-sets');
@@ -3708,7 +4450,7 @@
     if (bandDone)         forcePts += 1;
     deltas.force = parseFloat(Math.min(forcePts, 20).toFixed(1));
 
-    /* ── CORE ── */
+    /* -- CORE -- */
     var plankBest   = parseFloat(document.getElementById('plank-best').value)    || 0;
     var hollowBest  = parseFloat(document.getElementById('hollow-best').value)   || 0;
     var deadbugReps = parseFloat(document.getElementById('deadbug-reps').value)  || 0;
@@ -3724,7 +4466,7 @@
     if (coreExtra)      corePts += 1;
     deltas.core = parseFloat(Math.min(corePts, 20).toFixed(1));
 
-    /* ── RESOLVE ── */
+    /* -- RESOLVE -- */
     var prayerDone  = document.getElementById('prayer-done').checked;
     var prayerMin   = parseFloat(document.getElementById('prayer-duration').value) || 0;
     var journalDone = document.getElementById('journal-done').checked;
@@ -3736,12 +4478,12 @@
     if (journalDone) { resolvePts += 1; }
     deltas.resolve = parseFloat(Math.min(resolvePts, 3).toFixed(1));
 
-    /* ── LORE ── */
+    /* -- LORE -- */
     var lorePts = 0;
     if (readingDone) { lorePts += (readPages >= 20) ? 1.5 : 1; }
     deltas.lore = parseFloat(Math.min(lorePts, 2).toFixed(1));
 
-    /* ── POWER (split equally to Endurance + Force) ── */
+    /* -- POWER (split equally to Endurance + Force) -- */
     var contacts = parseFloat(document.getElementById('power-contacts').value) || 0;
     if (contacts > 0) {
       var powerBonus = Math.min(contacts * 0.05, 4);
@@ -3752,7 +4494,7 @@
     return deltas;
   }
 
-  /* ── COMMIT ─────────────────────────────────────────────── */
+  /* -- COMMIT ----------------------------------------------- */
   function commitLog() {
     var data = loadData();
     if (!data) return;
@@ -3834,7 +4576,7 @@
     populateHomeScreen(data);
   }
 
-  /* ── SUMMARY SCREEN ─────────────────────────────────────── */
+  /* -- SUMMARY SCREEN --------------------------------------- */
   function showSummary(prevStats, newStats, deltas, sessionType, recoveryTier) {
     var list = document.getElementById('summary-stats-list');
     list.innerHTML = '';
@@ -3884,7 +4626,7 @@
     document.getElementById('summaryOverlay').classList.remove('visible');
   }
 
-  /* ── Wire "Log Training" button on home screen ──────────── */
+  /* -- Wire "Log Training" button on home screen ------------ */
   document.addEventListener('DOMContentLoaded', function() {
     /* The first action button is Log Training */
     var btns = document.querySelectorAll('.action-btn');
@@ -3895,11 +4637,11 @@
   });
 
 
-  /* ════════════════════════════════════════════════════════════
+  /* ============================================================
      PHASE 4 — STREAK TRACKING & FAILURE STATES
-  ════════════════════════════════════════════════════════════ */
+  ============================================================ */
 
-  /* ── Absence tier passages ──────────────────────────────── */
+  /* -- Absence tier passages -------------------------------- */
   var ABSENCE_PASSAGES = {
     tier1: "You were not here. The road did not wait. The cold moved in from the east and settled where your fire had been. Two days. Three. The Reaches do not count them with sympathy.",
     tier2: "Five days. The Iron Gate does not move for the man who stopped coming. Whatever you were building in the cold before dawn — it waits, unchanged, for you to return to it. But it does not grow without you.",
@@ -3912,7 +4654,7 @@
     tier3: "A week. You know what it cost. The Reaches know too. There is no ceremony for beginning again — only the beginning. Start."
   };
 
-  /* ── Streak milestone definitions ──────────────────────── */
+  /* -- Streak milestone definitions ------------------------ */
   var STREAK_MILESTONES = [
     { days: 7,   icon: '🔥', title: 'Seven Days',
       passage: 'The Reaches have begun to recognise your footprints.' },
@@ -3926,7 +4668,7 @@
       passage: 'The road behind you is longer than the road ahead to October.' }
   ];
 
-  /* Upcoming races for the 30-day warning in Tier 2 ───────── */
+  /* Upcoming races for the 30-day warning in Tier 2 --------- */
   var RACES = [
     { name: 'Trial of the Iron Gate',   date: '2025-05-23', event: 'Spartan 5K Sprint' },
     { name: 'Running of the Ashwood',   date: '2025-06-20', event: 'Trail Run' },
@@ -3934,7 +4676,7 @@
     { name: 'Reckoning at the Black Spire', date: '2025-10-01', event: 'Trifecta Weekend' }
   ];
 
-  /* ── Helper: days between two date strings ──────────────── */
+  /* -- Helper: days between two date strings ---------------- */
   function daysBetween(dateStrA, dateStrB) {
     var a = new Date(dateStrA);
     var b = new Date(dateStrB);
@@ -3947,7 +4689,7 @@
     return new Date().toISOString().slice(0, 10);
   }
 
-  /* ── Calculate training absence in days ─────────────────── */
+  /* -- Calculate training absence in days ------------------- */
   function calcAbsenceDays(data) {
     var last = data.streaks.lastTrainingDate;
     if (!last) return 0;
@@ -3955,7 +4697,7 @@
     return diff > 0 ? diff : 0;
   }
 
-  /* ── Get nearest upcoming race within 30 days ──────────── */
+  /* -- Get nearest upcoming race within 30 days ------------ */
   function nearRaceWarning() {
     var today = todayStr();
     for (var i = 0; i < RACES.length; i++) {
@@ -3966,7 +4708,7 @@
     return null;
   }
 
-  /* ── Apply Tier 3 mana drain ─────────────────────────────── */
+  /* -- Apply Tier 3 mana drain ------------------------------- */
   function applyManaDrain(data) {
     if (!data.streaks.tier3DrainApplied) {
       data.character.mana = Math.floor((data.character.mana || 0) * 0.5);
@@ -3975,7 +4717,7 @@
     }
   }
 
-  /* ── Show absence overlay ────────────────────────────────── */
+  /* -- Show absence overlay ---------------------------------- */
   function showAbsence(tier, missedDays, data) {
     /* Tier pips */
     for (var t = 1; t <= 3; t++) {
@@ -4030,7 +4772,7 @@
     document.getElementById('absenceOverlay').classList.add('visible');
   }
 
-  /* ── Dismiss absence overlay ─────────────────────────────── */
+  /* -- Dismiss absence overlay ------------------------------- */
   function dismissAbsence() {
     document.getElementById('absenceOverlay').classList.remove('visible');
     /* Mark that the absence message has been seen for today */
@@ -4043,7 +4785,7 @@
     }
   }
 
-  /* ── Show streak milestone overlay ──────────────────────── */
+  /* -- Show streak milestone overlay ------------------------ */
   function showMilestone(streak, streakLabel) {
     var milestone = null;
     for (var i = STREAK_MILESTONES.length - 1; i >= 0; i--) {
@@ -4066,13 +4808,13 @@
     document.getElementById('milestoneOverlay').classList.remove('visible');
   }
 
-  /* ── Recovery flavour — shown in stat summary after absence ─ */
+  /* -- Recovery flavour — shown in stat summary after absence - */
   function getRecoveryFlavour(tier) {
     if (!tier) return null;
     return ABSENCE_RECOVERY['tier' + tier] || null;
   }
 
-  /* ── Core login check — called from init() ───────────────── */
+  /* -- Core login check — called from init() ----------------- */
   function checkAbsenceOnLogin(data) {
     var today = todayStr();
 
@@ -4110,7 +4852,7 @@
     }
   }
 
-  /* ── Resolve streak check ────────────────────────────────── */
+  /* -- Resolve streak check ---------------------------------- */
   function checkResolveStreak(data) {
     var today = todayStr();
     var last  = data.streaks.lastResolveDate;
@@ -4123,7 +4865,7 @@
     }
   }
 
-  /* ── Restoration streak check ────────────────────────────── */
+  /* -- Restoration streak check ------------------------------ */
   function checkRestorationStreak(data) {
     /* Restoration is weekly — check if last week's Sunday was missed */
     var lastWeek = data.streaks.lastRestorationWeek;
@@ -4138,7 +4880,7 @@
     }
   }
 
-  /* ── Check for milestone after a commit ─────────────────── */
+  /* -- Check for milestone after a commit ------------------- */
   function checkMilestonesAfterCommit(data) {
     var trainingStreak = data.streaks.training || 0;
     var resolveStreak  = data.streaks.resolve  || 0;
@@ -4159,18 +4901,18 @@
     }
   }
 
-  /* ── Store which absence tier was active before recovery ─── */
+  /* -- Store which absence tier was active before recovery --- */
   var _pendingRecoveryTier = null;
 
 
 
-  /* ════════════════════════════════════════════════════════════
+  /* ============================================================
      PHASE 5 — COMBAT ENGINE
-  ════════════════════════════════════════════════════════════ */
+  ============================================================ */
 
-  /* ── Monster roster ─────────────────────────────────────── */
+  /* -- Monster roster --------------------------------------- */
   var MONSTERS = [
-    /* ── Tier 1 ── */
+    /* -- Tier 1 -- */
     { id:'ash_hound',    tier:1, name:'The Ash Hound',   hp:30,  xp:50,  dmgMin:6,  dmgMax:10, portrait:'🐺',
       desc:'A gaunt grey dog with hollow eyes, fur matted with road dust. Moves in short bursts, retreats when struck hard.',
       special: null },
@@ -4184,7 +4926,7 @@
       desc:'An oversized black bird with reflective eyes. Attacks twice on its second round, then retreats to observe.',
       special: { type:'double_strike', triggerRound:2 } },
 
-    /* ── Tier 2 ── */
+    /* -- Tier 2 -- */
     { id:'marshwalker',  tier:2, name:'Marshwalker',     hp:50,  xp:80,  dmgMin:9,  dmgMax:14, portrait:'👣',
       desc:'A pale figure that moves through low ground without sound. Heals itself partway through the fight.',
       special: { type:'heal', triggerRound:3, amount:10 } },
@@ -4198,7 +4940,7 @@
       desc:'A flickering presence that alternates between near-absence and sudden violence. Time your Endure on the heavy rounds.',
       special: { type:'alternating', lightDmg:4, heavyDmg:18 } },
 
-    /* ── Tier 3 ── (available at level 4+) */
+    /* -- Tier 3 -- (available at level 4+) */
     { id:'grey_reaver',  tier:3, name:'The Grey Reaver', hp:80,  xp:130, dmgMin:13, dmgMax:19, portrait:'⚔️',
       desc:'A scarred mercenary who has survived too many fights. Gets more dangerous the longer combat continues.',
       special: { type:'escalating_rage', startRound:5, bonusPerRound:4 } },
@@ -4212,7 +4954,7 @@
       desc:'A resurrected soldier that ironically rewards the player who can land a massive single hit.',
       special: { type:'stun_on_big_hit', threshold:30 } },
 
-    /* ── Tier 4 ── (available at level 6+) */
+    /* -- Tier 4 -- (available at level 6+) */
     { id:'iron_widow',   tier:4, name:'The Iron Widow',  hp:120, xp:200, dmgMin:17, dmgMax:24, portrait:'🕷',
       desc:'A huntress with wire-wrapped hands who fights without expression. The poison is the test.',
       special: { type:'poison', triggerRound:3, dmgPerRound:5, duration:3 } },
@@ -4226,7 +4968,7 @@
       desc:'A shadowy opponent who learns your patterns. Forces variety — you cannot spam a single ability.',
       special: { type:'stun_repeat_action' } },
 
-    /* ── Tier 5 ── (available at level 6, escalation only) */
+    /* -- Tier 5 -- (available at level 6, escalation only) */
     { id:'pale_commander',tier:5,name:'The Pale Commander',hp:170,xp:320,dmgMin:22,dmgMax:30,portrait:'👑',
       desc:'A cold tactician who never fights alone. The summoned Ash Hound forces you to split attention.',
       special: { type:'summon', triggerRound:4, summonId:'ash_hound' } },
@@ -4241,7 +4983,7 @@
       special: { type:'ignore_passive_reduction' } }
   ];
 
-  /* ── Encounter atmospheric scenes ──────────────────────── */
+  /* -- Encounter atmospheric scenes ------------------------ */
   var ENCOUNTER_SCENES = [
     'The road narrows here. Something moves in the grey ahead.',
     'A shape detaches itself from the fog. It has noticed you.',
@@ -4253,7 +4995,7 @@
     'You came looking. You found.'
   ];
 
-  /* ── Victory / defeat passages ──────────────────────────── */
+  /* -- Victory / defeat passages ---------------------------- */
   var VICTORY_PASSAGES = [
     'It is down. You are still standing. That is the difference.',
     'The road is clear again — for now.',
@@ -4270,7 +5012,7 @@
     'Defeat is information. Use it.'
   ];
 
-  /* ── Combat state ───────────────────────────────────────── */
+  /* -- Combat state ----------------------------------------- */
   var CS = {
     active:      false,
     monster:     null,
@@ -4280,26 +5022,37 @@
     mana:        0,
     maxMana:     0,
     round:       1,
-    readBonus:   false,       /* true after Read the Enemy */
-    enduring:    false,       /* true if player chose Endure this round */
-    poisonRounds:0,           /* rounds of poison remaining */
+    readBonus:   false,
+    enduring:    false,
+    poisonRounds:0,
     poisonDmg:   0,
-    stunned:     false,       /* monster self-stun (Ashfield Revenant) */
-    playerStunned: false,     /* player stunned (Nightcaller) */
-    lastAction:  null,        /* for Nightcaller repeat-action detection */
-    enraged:     false,       /* Veldrath phase */
-    phase2:      false,       /* Last Warden phase 2 */
-    openingDone: false,       /* Executioner guaranteed open */
-    encountersToday: 0,       /* escalation counter */
+    stunned:     false,
+    playerStunned: false,
+    lastAction:  null,
+    enraged:     false,
+    phase2:      false,
+    openingDone: false,
+    encountersToday: 0,
     injuredToday: false,
-    ventureBlocked: false
+    ventureBlocked: false,
+    /* Phase 7 — ability tracking */
+    ownedAbilities:   [],     /* ability objects for owned abilities */
+    secondWindUsed:   false,  /* once per encounter */
+    steadfastUsed:    false,  /* once per encounter */
+    specialImmunity:  false,  /* Ironclad: used flag */
+    monsterDebuffRounds: 0,   /* Knowing Strike debuff remaining rounds */
+    monsterDebuffPct: 0,      /* fraction by which monster damage is reduced */
+    lastAbilityUsed:  null,   /* for Crusher consecutive block */
+    wordOfSourceDate: null,   /* date string — once per day */
+    rootedThisRound:  false,  /* Rooted -50% */
+    deadStillThisRound: false /* Dead Still -75% */
   };
 
-  /* ── D20 roll ────────────────────────────────────────────── */
+  /* -- D20 roll ---------------------------------------------- */
   function d20() { return Math.floor(Math.random() * 20) + 1; }
   function randBetween(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
-  /* ── Select appropriate monster ─────────────────────────── */
+  /* -- Select appropriate monster --------------------------- */
   function selectMonster(data) {
     var level = data.character.level || 1;
     /* Tier availability per level */
@@ -4316,7 +5069,7 @@
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
-  /* ── Open Venture Out (encounter preview) ─────────────── */
+  /* -- Open Venture Out (encounter preview) --------------- */
   function openVentureOut() {
     var data = loadData();
     if (!data) return;
@@ -4362,7 +5115,7 @@
     document.getElementById('encounterOverlay').classList.remove('visible');
   }
 
-  /* ── Start combat ────────────────────────────────────────── */
+  /* -- Start combat ------------------------------------------ */
   function startCombat() {
     var data = loadData();
     if (!data) return;
@@ -4400,8 +5153,24 @@
 
     /* Executioner guaranteed opening blow */
     if (CS.monster.special && CS.monster.special.type === 'guaranteed_open') {
-      CS.openingDone = false; /* will fire on round 1 monster turn */
+      CS.openingDone = false;
     }
+
+    /* Phase 7: load owned abilities and reset per-encounter limits */
+    var ownedIds = (data.abilities && data.abilities.owned) || [];
+    CS.ownedAbilities    = ABILITIES.filter(function(a) { return ownedIds.indexOf(a.id) !== -1; });
+    CS.secondWindUsed    = false;
+    CS.steadfastUsed     = false;
+    CS.specialImmunity   = ownedIds.indexOf('ironclad') !== -1;
+    CS.monsterDebuffRounds = 0;
+    CS.monsterDebuffPct  = 0;
+    CS.lastAbilityUsed   = null;
+    CS.rootedThisRound   = false;
+    CS.deadStillThisRound = false;
+
+    /* Check Word of the Source once-per-day limit */
+    var today = new Date().toISOString().slice(0,10);
+    CS.wordOfSourceDate  = (data.abilities && data.abilities.wordOfSourceDate === today) ? today : null;
 
     /* Populate combat UI */
     document.getElementById('combat-round-num').textContent      = 1;
@@ -4417,11 +5186,12 @@
     logEl.innerHTML = '';
     addCombatLog('You face ' + CS.monster.name + '. The road narrows.', 'system-note');
 
+    renderAbilityButtons();
     enableCombatButtons();
     document.getElementById('combatOverlay').classList.add('visible');
   }
 
-  /* ── Update HP bars ──────────────────────────────────────── */
+  /* -- Update HP bars ---------------------------------------- */
   function updateCombatBars() {
     var pPct = Math.max(0, Math.round(CS.playerHp / CS.playerMaxHp * 100));
     var mPct = Math.max(0, Math.round(CS.monsterHp / CS.monster.hp * 100));
@@ -4449,7 +5219,7 @@
     }
   }
 
-  /* ── Combat log helper ────────────────────────────────────── */
+  /* -- Combat log helper -------------------------------------- */
   function addCombatLog(text, cls) {
     var logEl = document.getElementById('combat-log');
     var line  = document.createElement('div');
@@ -4459,51 +5229,136 @@
     logEl.scrollTop = logEl.scrollHeight;
   }
 
-  /* ── Enable / disable action buttons ─────────────────────── */
+  /* -- Enable / disable action buttons ----------------------- */
   function enableCombatButtons() {
     ['strike','endure','read'].forEach(function(a) {
       document.getElementById('btn-' + a).disabled = false;
     });
-    /* Primed indicator for Read bonus */
     document.getElementById('btn-strike').classList.toggle('primed', CS.readBonus);
+    /* Phase 7: enable active ability buttons */
+    document.querySelectorAll('.combat-ability-btn').forEach(function(btn) {
+      var id   = btn.getAttribute('data-ability-id');
+      var cost = parseInt(btn.getAttribute('data-mana-cost'), 10) || 0;
+      var ab   = ABILITIES.find(function(a) { return a.id === id; });
+      var unavailable = false;
+      if (cost > CS.mana)                                         unavailable = true;
+      if (id === 'second_wind'   && CS.secondWindUsed)            unavailable = true;
+      if (id === 'steadfast'     && CS.steadfastUsed)             unavailable = true;
+      if (id === 'crusher'       && CS.lastAbilityUsed === 'crusher') unavailable = true;
+      if (id === 'word_of_source' && CS.wordOfSourceDate)         unavailable = true;
+      btn.disabled = unavailable;
+      btn.classList.toggle('primed', !unavailable && id === CS.lastAbilityUsed + '_ready');
+    });
   }
 
   function disableCombatButtons() {
     ['strike','endure','read'].forEach(function(a) {
       document.getElementById('btn-' + a).disabled = true;
     });
+    document.querySelectorAll('.combat-ability-btn').forEach(function(btn) {
+      btn.disabled = true;
+    });
   }
 
-  /* ── Calculate player damage (Strike) ───────────────────── */
-  function calcPlayerDamage(data) {
+  /* -- Render owned active ability buttons into combat footer -- */
+  function renderAbilityButtons() {
+    var footer = document.getElementById('combat-footer');
+    /* Remove any previously rendered ability buttons */
+    footer.querySelectorAll('.combat-ability-btn').forEach(function(b) { b.remove(); });
+
+    CS.ownedAbilities.forEach(function(ab) {
+      if (ab.type !== 'active') return;
+      var btn = document.createElement('button');
+      btn.className = 'combat-action-btn combat-ability-btn';
+      btn.setAttribute('data-ability-id', ab.id);
+      btn.setAttribute('data-mana-cost', ab.cost);
+      btn.innerHTML =
+        ab.name +
+        '<span class="btn-cost">' + ab.costLabel + ' · ' + ab.branch.charAt(0).toUpperCase() + ab.branch.slice(1) + '</span>';
+      btn.onclick = function() { combatAbilityAction(ab.id); };
+      footer.appendChild(btn);
+    });
+  }
+
+  /* -- Calculate player damage (Strike) --------------------- */
+  function calcPlayerDamage(data, multiplier) {
+    multiplier = multiplier || 1;
     var force = data.stats.force || 0;
     var roll  = d20();
-    /* Base damage: 5–15 scaled by Force */
     var base  = 5 + Math.floor(force / 10 * 5);
-    /* D20 modifier: roll 15+ = +4, roll 5- = -2 */
     var mod   = roll >= 15 ? 4 : roll <= 5 ? -2 : 0;
     var dmg   = Math.max(1, base + mod);
     if (CS.readBonus) { dmg = Math.round(dmg * 1.3); }
-    /* Hollow Knight damage reduction */
-    if (CS.monster.special && CS.monster.special.type === 'damage_reduction') {
-      dmg = Math.max(1, dmg - CS.monster.special.flat);
+
+    /* Phase 7 passives: Clubber +10% */
+    if (hasAbility('clubber')) { dmg = Math.round(dmg * 1.10); }
+
+    /* Phase 7 passives: Grinding Pace +5% per round beyond 3 */
+    if (hasAbility('grinding_pace') && CS.round > 3) {
+      var gpBonus = 1 + ((CS.round - 3) * 0.05);
+      dmg = Math.round(dmg * gpBonus);
     }
+
+    /* Apply ability multiplier (for active ability strikes) */
+    dmg = Math.round(dmg * multiplier);
+
+    /* Hollow Knight flat reduction */
+    if (CS.monster.special && CS.monster.special.type === 'damage_reduction') {
+      /* Ironclad immunity check */
+      if (CS.specialImmunity) {
+        addCombatLog('Ironclad: special attack ignored.', 'system-note');
+        CS.specialImmunity = false;
+      } else {
+        dmg = Math.max(1, dmg - CS.monster.special.flat);
+      }
+    }
+
+    /* Mireborn Ancient ignores passive damage reduction */
+    var mireborn = CS.monster.id === 'mireborn';
+    if (!mireborn) {
+      /* Iron Grip passive 5% reduction already handled in incoming calc */
+    }
+
     /* Thornback reflect */
     if (CS.monster.special && CS.monster.special.type === 'reflect') {
       CS.playerHp -= CS.monster.special.reflectDmg;
       addCombatLog('The carapace reflects ' + CS.monster.special.reflectDmg + ' damage back at you.', 'monster-action');
     }
+
     return { dmg: dmg, roll: roll };
   }
 
-  /* ── Calculate monster damage ────────────────────────────── */
+  /* -- Helper: does player own this ability? ------------------- */
+  function hasAbility(id) {
+    return CS.ownedAbilities.some(function(a) { return a.id === id; });
+  }
+
+  /* -- Calculate monster damage ------------------------------ */
   function calcMonsterDamage() {
     var m   = CS.monster;
     var dmg = randBetween(m.dmgMin, m.dmgMax);
 
-    /* Endure reduces incoming damage by (Endurance+Core)/20, min 20% reduction */
+    /* Endure base reduction */
     if (CS.enduring) {
       dmg = Math.max(1, Math.round(dmg * 0.55));
+    }
+
+    /* Phase 7: Rooted (-50%) */
+    if (CS.rootedThisRound) {
+      dmg = Math.max(1, Math.round(dmg * 0.50));
+      CS.rootedThisRound = false;
+    }
+
+    /* Phase 7: Dead Still (-75%) */
+    if (CS.deadStillThisRound) {
+      dmg = Math.max(1, Math.round(dmg * 0.25));
+      CS.deadStillThisRound = false;
+    }
+
+    /* Phase 7: Knowing Strike debuff */
+    if (CS.monsterDebuffRounds > 0) {
+      dmg = Math.max(1, Math.round(dmg * (1 - CS.monsterDebuffPct)));
+      CS.monsterDebuffRounds--;
     }
 
     /* Surge (Ironwood Stalker round 4) */
@@ -4536,7 +5391,7 @@
     return dmg;
   }
 
-  /* ── Main combat action handler ──────────────────────────── */
+  /* -- Main combat action handler ---------------------------- */
   function combatAction(action) {
     if (!CS.active) return;
     var data = loadData();
@@ -4554,7 +5409,7 @@
     CS.enduring   = false;
     CS.readBonus  = false;
 
-    /* ── Player turn ── */
+    /* -- Player turn -- */
     if (!CS.playerStunned) {
       if (action === 'strike') {
         var result = calcPlayerDamage(data);
@@ -4610,13 +5465,13 @@
       return;
     }
 
-    /* ── Monster turn ── */
+    /* -- Monster turn -- */
     setTimeout(function() {
       executeMonsterTurn(data);
     }, 600);
   }
 
-  /* ── Monster turn ──────────────────────────────────────────── */
+  /* -- Monster turn -------------------------------------------- */
   function executeMonsterTurn(data) {
     var m = CS.monster;
 
@@ -4648,12 +5503,36 @@
       if (monDmg === -1) {
         /* Shield round: monster defended — no damage */
       } else if (monDmg > 0) {
+        /* Phase 7 passive incoming reducers (Mireborn ignores passive reduction) */
+        var mireborn = CS.monster.id === 'mireborn';
+        var rawDmg = monDmg;
+        if (!mireborn) {
+          /* Iron Grip: -5% */
+          if (hasAbility('iron_grip'))  { monDmg = Math.max(1, Math.round(monDmg * 0.95)); }
+          /* Ironbelly: flat -3 */
+          if (hasAbility('ironbelly'))  { monDmg = Math.max(1, monDmg - 3); }
+          /* The Long Road: HP cannot drop below 5 from single hit */
+          if (hasAbility('the_long_road') && CS.playerHp - monDmg < 5) {
+            monDmg = Math.max(0, CS.playerHp - 5);
+            addCombatLog('The Long Road holds — damage capped to prevent dropping below 5 HP.', 'system-note');
+          }
+        }
+
+        /* Steadfast: auto-resist when HP drops below 20% */
+        var hpAfter = CS.playerHp - monDmg;
+        if (!CS.steadfastUsed && hasAbility('steadfast') && hpAfter / CS.playerMaxHp < 0.20) {
+          CS.steadfastUsed = true;
+          monDmg = 0;
+          addCombatLog('Steadfast: the attack is resisted — HP below 20%.', 'system-note');
+        }
+
         CS.playerHp -= monDmg;
         var playerPortrait = document.getElementById('combat-player-portrait');
         playerPortrait.classList.remove('struck');
         void playerPortrait.offsetWidth;
         playerPortrait.classList.add('struck');
-        addCombatLog(m.name + ' attacks for ' + monDmg + ' damage.', 'monster-action');
+        var dmgNote = (monDmg < rawDmg && rawDmg > 0) ? ' (' + rawDmg + ' → ' + monDmg + ' after passives)' : '';
+        addCombatLog(m.name + ' attacks for ' + monDmg + ' damage.' + dmgNote, 'monster-action');
       }
     }
 
@@ -4700,7 +5579,131 @@
     enableCombatButtons();
   }
 
-  /* ── Victory ─────────────────────────────────────────────── */
+  /* -- Active ability handler (Phase 7) --------------------- */
+  function combatAbilityAction(abilityId) {
+    if (!CS.active) return;
+    var data = loadData();
+    if (!data) return;
+
+    var ab = ABILITIES.find(function(a) { return a.id === abilityId; });
+    if (!ab) return;
+
+    /* Mana check */
+    if (CS.mana < ab.cost) {
+      addCombatLog('Not enough Mana for ' + ab.name + '.', 'system-note');
+      return;
+    }
+
+    disableCombatButtons();
+    CS.mana -= ab.cost;
+    renderCombatManaPips();
+
+    /* Nightcaller stun on repeated action */
+    if (CS.monster.id === 'nightcaller' && CS.lastAction === abilityId) {
+      CS.playerStunned = true;
+      addCombatLog(CS.monster.name + ' anticipated your pattern. You are stunned for this round.', 'monster-action');
+    }
+    CS.lastAction     = abilityId;
+    CS.readBonus      = false;
+    CS.enduring       = false;
+    CS.rootedThisRound = false;
+    CS.deadStillThisRound = false;
+
+    /* -- The Hanging Strike: 150% strike -- */
+    if (abilityId === 'hanging_strike') {
+      var r = calcPlayerDamage(data, 1.5);
+      CS.monsterHp -= r.dmg;
+      addCombatLog('The Hanging Strike connects — ' + r.dmg + ' damage (150%).', 'player-action');
+      animateMonsterStruck();
+    }
+
+    /* -- Mighty Fist: 200% + stun monster -- */
+    else if (abilityId === 'mighty_fist') {
+      var r = calcPlayerDamage(data, 2.0);
+      CS.monsterHp -= r.dmg;
+      CS.stunned = true;
+      addCombatLog('Mighty Fist — ' + r.dmg + ' damage. Monster stunned one round.', 'player-action');
+      animateMonsterStruck();
+    }
+
+    /* -- Crusher: 250%, no consecutive -- */
+    else if (abilityId === 'crusher') {
+      var r = calcPlayerDamage(data, 2.5);
+      CS.monsterHp -= r.dmg;
+      addCombatLog('Crusher — ' + r.dmg + ' damage.', 'player-action');
+      animateMonsterStruck();
+    }
+
+    /* -- Second Wind: +15 HP, once per encounter -- */
+    else if (abilityId === 'second_wind') {
+      CS.secondWindUsed = true;
+      CS.playerHp = Math.min(CS.playerMaxHp, CS.playerHp + 15);
+      updateCombatBars();
+      addCombatLog('Second Wind — 15 HP restored.', 'player-action');
+    }
+
+    /* -- The Knowing Strike: 175% + debuff monster 2 rounds -- */
+    else if (abilityId === 'knowing_strike') {
+      var r = calcPlayerDamage(data, 1.75);
+      CS.monsterHp -= r.dmg;
+      CS.monsterDebuffRounds = 2;
+      CS.monsterDebuffPct    = 0.20;
+      addCombatLog('The Knowing Strike — ' + r.dmg + ' damage. Monster damage reduced 20% for 2 rounds.', 'player-action');
+      animateMonsterStruck();
+    }
+
+    /* -- Word of the Source: 3× damage + full HP restore, once per day -- */
+    else if (abilityId === 'word_of_source') {
+      var today = new Date().toISOString().slice(0,10);
+      CS.wordOfSourceDate = today;
+      /* Save once-per-day marker */
+      if (!data.abilities) data.abilities = { owned: [] };
+      data.abilities.wordOfSourceDate = today;
+      saveData(data);
+
+      var r = calcPlayerDamage(data, 3.0);
+      CS.monsterHp -= r.dmg;
+      CS.playerHp  = CS.playerMaxHp;
+      updateCombatBars();
+      addCombatLog('Word of the Source — ' + r.dmg + ' damage. HP fully restored.', 'player-action');
+      animateMonsterStruck();
+    }
+
+    /* -- Rooted: -50% incoming this round -- */
+    else if (abilityId === 'rooted') {
+      CS.rootedThisRound = true;
+      addCombatLog('Rooted — incoming damage reduced 50% this round.', 'player-action');
+    }
+
+    /* -- Dead Still: -75% incoming this round -- */
+    else if (abilityId === 'dead_still') {
+      CS.deadStillThisRound = true;
+      addCombatLog('Dead Still — incoming damage reduced 75% this round.', 'player-action');
+    }
+
+    updateCombatBars();
+
+    /* Check monster death */
+    if (CS.monsterHp <= 0) {
+      resolveVictory(data);
+      return;
+    }
+
+    /* Monster turn */
+    setTimeout(function() {
+      executeMonsterTurn(data);
+    }, 600);
+  }
+
+  function animateMonsterStruck() {
+    var portrait = document.getElementById('combat-monster-portrait');
+    portrait.classList.remove('struck');
+    void portrait.offsetWidth;
+    portrait.classList.add('struck');
+  }
+
+
+  /* -- Victory ----------------------------------------------- */
   function resolveVictory(data) {
     CS.active = false;
     CS.monsterHp = 0;
@@ -4714,8 +5717,9 @@
     /* Reduced XP if monster tier significantly below player */
     if (CS.monster.tier < level - 1) xpGain = Math.round(xpGain * 0.5);
 
-    data.character.xp  = (data.character.xp || 0) + xpGain;
-    data.character.hp  = Math.max(1, CS.playerHp); /* persist current HP */
+    data.character.xp   = (data.character.xp || 0) + xpGain;
+    data.character.hp   = Math.max(1, CS.playerHp);
+    data.character.mana = CS.mana; /* persist mana spent during combat */
 
     /* Save encounter count */
     if (!data.combat) data.combat = {};
@@ -4728,6 +5732,9 @@
     var lvl = data.character.level || 1;
     var xpNeeded = xpThresholds[Math.min(lvl, xpThresholds.length - 1)];
     var xpCurrent = data.character.xp;
+
+    /* Phase 8: track total victories for world stage 1 trigger */
+    incrementTotalVictories(data);
 
     /* Phase 6: check for level-up BEFORE saving */
     var didLevelUp = checkLevelUp(data);
@@ -4757,7 +5764,7 @@
     }
   }
 
-  /* ── Defeat ──────────────────────────────────────────────── */
+  /* -- Defeat ------------------------------------------------ */
   function resolveDefeat(data) {
     CS.active    = false;
     CS.playerHp  = 0;
@@ -4767,7 +5774,8 @@
     if (!data.combat) data.combat = {};
     var today = new Date().toISOString().slice(0,10);
     data.combat.ventureBlockedDate = today;
-    data.character.hp = data.character.maxHp || CS.playerMaxHp; /* reset for tomorrow */
+    data.character.hp   = data.character.maxHp || CS.playerMaxHp;
+    data.character.mana = CS.mana; /* mana does not restore on defeat */
     saveData(data);
     populateHomeScreen(data);
 
@@ -4782,7 +5790,7 @@
     document.getElementById('combatResultOverlay').classList.add('visible');
   }
 
-  /* ── Close result screen ─────────────────────────────────── */
+  /* -- Close result screen ----------------------------------- */
   function closeCombatResult() {
     document.getElementById('combatResultOverlay').classList.remove('visible');
 
@@ -4795,7 +5803,7 @@
     }
   }
 
-  /* ── Wire Venture Out button ─────────────────────────────── */
+  /* -- Wire Venture Out button ------------------------------- */
   document.addEventListener('DOMContentLoaded', function() {
     var btns = document.querySelectorAll('.action-btn');
     /* btns[0] = Log Training (wired in Phase 3), btns[1] = Venture Out */
@@ -4813,7 +5821,7 @@
     });
   });
 
-  /* ── Update home screen XP bar from data ─────────────────── */
+  /* -- Update home screen XP bar from data ------------------- */
   /* (populateHomeScreen already handles this in Phase 1–2 code) */
   /* We need to make sure XP bar is wired. Patch populateHomeScreen: */
   var _origPopulateHome = populateHomeScreen;
@@ -4839,17 +5847,17 @@
 
 
 
-  /* ════════════════════════════════════════════════════════════
+  /* ============================================================
      PHASE 6 — LEVEL UP & ABILITIES TREE
-  ════════════════════════════════════════════════════════════ */
+  ============================================================ */
 
-  /* ── XP thresholds (index = level needed to reach) ──────── */
+  /* -- XP thresholds (index = level needed to reach) -------- */
   var XP_THRESHOLDS = [0, 200, 500, 900, 1400, 2000, 2700, 3500, 4400, 5400];
 
-  /* ── Roman numerals ──────────────────────────────────────── */
+  /* -- Roman numerals ---------------------------------------- */
   var ROMAN = ['', 'I','II','III','IV','V','VI','VII','VIII','IX','X'];
 
-  /* ── Level-up narrative moments ─────────────────────────── */
+  /* -- Level-up narrative moments --------------------------- */
   var LEVELUP_MOMENTS = {
     2:  { title: 'The Road Opens',
           passage: 'Two hundred steps behind you. The Reaches have noticed. Not with warmth — with the cold acknowledgement that something capable has entered the territory. You are no longer a stranger here.' },
@@ -4871,7 +5879,7 @@
           passage: 'You have reached the end of the numbered levels. The Reaches do not offer celebration for this. They offer continuation — deeper country, harder things, the same cold road forward.' }
   };
 
-  /* ── Full abilities definition ───────────────────────────── */
+  /* -- Full abilities definition ----------------------------- */
   var ABILITIES = [
     /* Branch 1 — Iron */
     { id:'iron_grip',       branch:'iron',       name:'Iron Grip',
@@ -4975,13 +5983,13 @@
     core:      'Prerequisite: Core stat'
   };
 
-  /* ── State for current level-up session ─────────────────── */
+  /* -- State for current level-up session ------------------- */
   var LU = {
     newLevel:          1,
     selectedAbilityId: null
   };
 
-  /* ── Check if an ability's stat prereqs are met ─────────── */
+  /* -- Check if an ability's stat prereqs are met ----------- */
   function abilityPrereqsMet(ability, stats) {
     var reqs = ability.statReq;
     for (var stat in reqs) {
@@ -4990,7 +5998,7 @@
     return true;
   }
 
-  /* ── Build the abilities tree HTML ──────────────────────── */
+  /* -- Build the abilities tree HTML ------------------------ */
   function buildAbilitiesTree(data) {
     var container = document.getElementById('abilities-tree-container');
     container.innerHTML = '';
@@ -5072,7 +6080,7 @@
     });
   }
 
-  /* ── Handle ability selection ────────────────────────────── */
+  /* -- Handle ability selection ------------------------------ */
   function selectAbility(abilityId) {
     /* Deselect all */
     document.querySelectorAll('.ability-card.selected-this-level').forEach(function(el) {
@@ -5097,7 +6105,7 @@
     }
   }
 
-  /* ── Confirm ability choice ──────────────────────────────── */
+  /* -- Confirm ability choice -------------------------------- */
   function confirmAbility() {
     if (!LU.selectedAbilityId) return;
     var data = loadData();
@@ -5113,7 +6121,7 @@
     populateHomeScreen(data);
   }
 
-  /* ── Skip ability (can return later — but choice will be lost on next level) */
+  /* -- Skip ability (can return later — but choice will be lost on next level) */
   function skipAbility() {
     closeLevelUp();
   }
@@ -5126,7 +6134,7 @@
       'Select an ability you have earned the right to carry.';
   }
 
-  /* ── Show level-up screen ────────────────────────────────── */
+  /* -- Show level-up screen ---------------------------------- */
   function showLevelUp(newLevel, data) {
     LU.newLevel = newLevel;
     LU.selectedAbilityId = null;
@@ -5146,7 +6154,7 @@
     document.getElementById('levelUpOverlay').classList.add('visible');
   }
 
-  /* ── Check for level-up after XP gain ───────────────────── */
+  /* -- Check for level-up after XP gain --------------------- */
   function checkLevelUp(data) {
     var level = data.character.level || 1;
     if (level >= 10) return false;  /* max level */
@@ -5174,7 +6182,7 @@
     return false;
   }
 
-  /* ── Update home screen level display ───────────────────── */
+  /* -- Update home screen level display --------------------- */
   /* Patch populateHomeScreen to show correct level Roman numeral */
   var _origPopulateHome2 = populateHomeScreen;
   populateHomeScreen = function(data) {
@@ -5189,6 +6197,980 @@
     var maxHp = (lvl * 10) + Math.floor(coreStat / 10 * 5) + 40;
     if (data.character.maxHp !== maxHp) {
       /* Sync maxHp silently */
+    }
+  };
+
+
+
+  /* ============================================================
+     PHASE 8 — WORLD IMAGE TRANSFORMATION
+  ============================================================ */
+
+  /*
+    IMAGE FILE GUIDE (add these files to your GitHub repo root):
+    -------------------------------------------------------------
+    stage-0.jpg  — Day 1 / start. Empty road, grey sky, dead tree, cold.
+    stage-1.jpg  — After Level 1 battle won. Faint fire in far distance.
+    stage-2.jpg  — After Level 2 battle won. Silhouetted figure on road ahead.
+    stage-3.jpg  — After May 23 (Trial of the Iron Gate). Stone gate behind you, already crossed.
+    stage-4.jpg  — After June 20 (Running of the Ashwood). Road from dark forest into wider landscape.
+    stage-5.jpg  — After Level 5 narrative battle. Lights of settlement in middle distance.
+    stage-6.jpg  — After Sept 21 (March on Valdenmoor). Black Spire on the horizon, first time.
+    stage-7.jpg  — After October (Reckoning at the Black Spire). World transformed. Road populated. Sky settled.
+
+    AI PROMPT BASE (adjust [SCENE DESCRIPTION] for each stage):
+    -------------------------------------------------------------
+    "A dark cinematic road scene in a cold northern wilderness. 
+    [SCENE DESCRIPTION]. Desaturated palette, charcoal and ash tones, 
+    muted amber at the horizon. Photorealistic with painterly post-processing, 
+    dark vignette edges, fine film grain. Northern European sky, no bright 
+    lighting, no fantasy clichés, no heroic figures. Aspect ratio 16:9."
+    -------------------------------------------------------------
+  */
+
+  /* -- Stage definitions ------------------------------------- */
+  var WORLD_STAGES = [
+    { id: 0, img: 'stage-0.jpg',
+      desc: 'Empty road. Grey sky. Dead tree. Cold and waiting.' },
+    { id: 1, img: 'stage-1.jpg',
+      desc: 'A faint fire visible in the far distance.' },
+    { id: 2, img: 'stage-2.jpg',
+      desc: 'A silhouetted figure on the road ahead.' },
+    { id: 3, img: 'stage-3.jpg',
+      desc: 'A stone gate visible behind you. Already crossed.' },
+    { id: 4, img: 'stage-4.jpg',
+      desc: 'Road emerges from dark forest into wider landscape.' },
+    { id: 5, img: 'stage-5.jpg',
+      desc: 'Lights of a settlement visible in the middle distance.' },
+    { id: 6, img: 'stage-6.jpg',
+      desc: 'Black Spire visible on the horizon for the first time.' },
+    { id: 7, img: 'stage-7.jpg',
+      desc: 'World transformed. Road populated. Sky settled.' }
+  ];
+
+  /* -- Determine current world stage from save data ---------- */
+  function calcWorldStage(data) {
+    if (!data || !data.setupComplete) return 0;
+
+    var level    = data.character ? (data.character.level || 1) : 1;
+    var ordained = data.ordained  || {};
+    var today    = new Date().toISOString().slice(0, 10);
+
+    /* Stage 7: Reckoning at the Black Spire complete (October ordained battle) */
+    if (ordained.blackSpire) return 7;
+
+    /* Stage 6: March on Valdenmoor complete (Sept 21) */
+    if (ordained.valdenmoor) return 6;
+
+    /* Stage 5: Level 5 reached */
+    if (level >= 5) return 5;
+
+    /* Stage 4: Running of the Ashwood complete (June 20) */
+    if (ordained.ashwood) return 4;
+
+    /* Stage 3: Trial of the Iron Gate complete (May 23) */
+    if (ordained.ironGate) return 3;
+
+    /* Stage 2: Level 2 reached (second standard battle won) */
+    if (level >= 2) return 2;
+
+    /* Stage 1: At least one combat victory */
+    var log = data.log || [];
+    var hasCombatVictory = data.combat &&
+      (data.combat.encountersToday > 0 || (data.combat.totalVictories || 0) > 0);
+    if (hasCombatVictory) return 1;
+
+    return 0;
+  }
+
+  /* -- Apply world stage to the hero image ------------------- */
+  function applyWorldStage(data) {
+    var stageIdx = calcWorldStage(data);
+    var stage    = WORLD_STAGES[stageIdx];
+    var heroImg  = document.querySelector('.hero-image');
+    if (!heroImg) return;
+
+    /* Try to load the image — if it fails, keep CSS fallback */
+    var img = new Image();
+    img.onload = function() {
+      heroImg.style.setProperty('--world-image', 'url("' + stage.img + '")');
+      heroImg.classList.add('has-image');
+    };
+    img.onerror = function() {
+      /* Image not present — CSS-drawn fallback stays, no error shown */
+      heroImg.classList.remove('has-image');
+    };
+    img.src = stage.img;
+
+    /* Store current stage on data for absence modifier reference */
+    if (!data.world) data.world = {};
+    if (data.world.stage !== stageIdx) {
+      data.world.stage = stageIdx;
+      /* Don't save here — called frequently from populateHomeScreen */
+    }
+  }
+
+  /* -- Apply absence darkening to hero image ----------------- */
+  function applyAbsenceDarkening(data) {
+    var heroImg = document.querySelector('.hero-image');
+    if (!heroImg) return;
+
+    heroImg.classList.remove('absence-tier-1', 'absence-tier-2', 'absence-tier-3');
+
+    var missed  = calcAbsenceDays(data);
+    if (missed >= 7)      heroImg.classList.add('absence-tier-3');
+    else if (missed >= 4) heroImg.classList.add('absence-tier-2');
+    else if (missed >= 2) heroImg.classList.add('absence-tier-1');
+  }
+
+  /* -- Track total victories for stage-1 trigger ------------ */
+  /* Called from resolveVictory — increment totalVictories */
+  function incrementTotalVictories(data) {
+    if (!data.combat) data.combat = {};
+    data.combat.totalVictories = (data.combat.totalVictories || 0) + 1;
+  }
+
+  /* -- Patch populateHomeScreen to apply world stage -------- */
+  var _origPopulateHome3 = populateHomeScreen;
+  populateHomeScreen = function(data) {
+    _origPopulateHome3(data);
+    applyWorldStage(data);
+    applyAbsenceDarkening(data);
+  };
+
+
+
+  /* ============================================================
+     PHASE 9 — ORDAINED BATTLE SYSTEM
+  ============================================================ */
+
+  /* -- Race definitions -------------------------------------- */
+  var ORDAINED_RACES = [
+    {
+      id:       'ironGate',
+      name:     'Trial of the Iron Gate',
+      subtitle: 'Spartan 5K Sprint · May 23, 2025',
+      date:     '2025-05-23',
+      baseXp:   500,
+      eyebrow:  'Ordained Battle — Race Three',
+
+      passage:  'The gate was always real. You knew this on some level from the first cold morning you trained for it. What you did not know was what it would feel like to stand in front of it — the noise, the weight of the thing, the way your body remembered everything it had been asked to do in the months before. You crossed. That is the fact of it.',
+
+      branches: [
+        {
+          id:    'hard',
+          name:  'The Hard Crossing',
+          desc:  'Survived. Harder than expected. The grip held but only just. The gate was crossed — not cleanly.',
+          xpMult: 1.0,
+          statBonus:  null,
+          statBonus2: null,
+          abilityId:  null,
+          rewardText: 'Base XP only. No stat bonus.'
+        },
+        {
+          id:    'earned',
+          name:  'The Earned Fight',
+          desc:  'Completed. Held what was trained. The Iron showed.',
+          xpMult: 1.25,
+          statBonus:  { stat: 'iron', amount: 10 },
+          statBonus2: null,
+          abilityId:  null,
+          rewardText: '+10 Iron'
+        },
+        {
+          id:    'threshold',
+          name:  'Beyond the Threshold',
+          desc:  'Exceeded expectations. Something in the gate recognised you.',
+          xpMult: 1.50,
+          statBonus:  { stat: 'iron',  amount: 10 },
+          statBonus2: { stat: 'force', amount: 8  },
+          abilityId:  'gatekeepers_knowledge',
+          rewardText: '+10 Iron · +8 Force · Ability Unlocked'
+        }
+      ],
+
+      resultPassages: {
+        hard:      'The gate is behind you now. That is the only thing that matters. The crossing was hard. It was still a crossing.',
+        earned:    'The Iron showed. The gate had no answer for what you had built in the dark. You earned the right to have crossed it.',
+        threshold: 'You did not just cross. You arrived at the other side knowing something the gate did not expect you to know. The road ahead is different now.'
+      }
+    },
+
+    {
+      id:       'ashwood',
+      name:     'Running of the Ashwood',
+      subtitle: 'Trail Run · June 20, 2025',
+      date:     '2025-06-20',
+      baseXp:   600,
+      eyebrow:  'Ordained Battle — Race Four',
+
+      passage:  'The Ashwood does not care about your pace. It cares about whether you keep moving when the ground is bad and the light is wrong and the body is asking you to stop. The trees do not watch. Nothing watches. That is the test — doing the work in front of nothing.',
+
+      branches: [
+        {
+          id:    'hard',
+          name:  'The Hard Crossing',
+          desc:  'Survived the Ashwood. The terrain won some rounds. You won the one that counted.',
+          xpMult: 1.0,
+          statBonus:  null,
+          statBonus2: null,
+          abilityId:  null,
+          rewardText: 'Base XP only.'
+        },
+        {
+          id:    'earned',
+          name:  'The Earned Fight',
+          desc:  'Completed. Endurance held through hostile terrain.',
+          xpMult: 1.25,
+          statBonus:  { stat: 'endurance', amount: 12 },
+          statBonus2: null,
+          abilityId:  null,
+          rewardText: '+12 Endurance'
+        },
+        {
+          id:    'threshold',
+          name:  'Beyond the Threshold',
+          desc:  'The Ashwood gave everything it had. It was not enough.',
+          xpMult: 1.50,
+          statBonus:  { stat: 'endurance', amount: 12 },
+          statBonus2: { stat: 'core',      amount: 8  },
+          abilityId:  'ashwood_pace',
+          rewardText: '+12 Endurance · +8 Core · Ability Unlocked'
+        }
+      ],
+
+      resultPassages: {
+        hard:      'The wood is behind you. The crossing happened. Whatever it cost you — it cost less than not having crossed.',
+        earned:    'The Endurance held. Every early morning that built it showed in the Ashwood. The road out of the trees is wider than the road in.',
+        threshold: 'You ran the Ashwood the way it was meant to be run — without hesitation, without transaction, as if the trees were simply in the way of where you were going.'
+      }
+    },
+
+    {
+      id:       'valdenmoor',
+      name:     'March on Valdenmoor',
+      subtitle: 'Spartan 21K Super · September 21, 2025',
+      date:     '2025-09-21',
+      baseXp:   900,
+      eyebrow:  'Ordained Battle — Race Six',
+
+      passage:  'The Valdenmoor is not a race. It is a campaign. Twenty-one kilometres of contested ground, obstacles that test different things at different points, and a body that has to answer questions it has never been asked before in the same sequence. Some people will not finish. You knew this going in. You finished.',
+
+      branches: [
+        {
+          id:    'hard',
+          name:  'The Hard Crossing',
+          desc:  'Survived the full distance. Some obstacles surrendered reluctantly. The body answered.',
+          xpMult: 1.0,
+          statBonus:  null,
+          statBonus2: null,
+          abilityId:  null,
+          rewardText: 'Base XP only.'
+        },
+        {
+          id:    'earned',
+          name:  'The Earned Fight',
+          desc:  'Completed. Held the line on the long haul. Endurance did not fail.',
+          xpMult: 1.25,
+          statBonus:  { stat: 'endurance', amount: 15 },
+          statBonus2: null,
+          abilityId:  null,
+          rewardText: '+15 Endurance'
+        },
+        {
+          id:    'threshold',
+          name:  'Beyond the Threshold',
+          desc:  'The Valdenmoor is behind you and it knows it was beaten.',
+          xpMult: 1.50,
+          statBonus:  { stat: 'endurance', amount: 15 },
+          statBonus2: { stat: 'force',     amount: 10 },
+          abilityId:  'valdenmoors_weight',
+          rewardText: '+15 Endurance · +10 Force · Ability Unlocked'
+        }
+      ],
+
+      resultPassages: {
+        hard:      'Twenty-one kilometres. You are on the other side of it now. That fact is permanent.',
+        earned:    'The campaign ran long and the body held. The training was not a rehearsal — it was the thing itself, done in pieces.',
+        threshold: 'The Black Spire is now visible on the horizon. What you did today is what made it visible. October is close.'
+      }
+    },
+
+    {
+      id:       'blackSpire',
+      name:     'Reckoning at the Black Spire',
+      subtitle: 'Spartan Trifecta Weekend · October 2025',
+      date:     '2025-10-01',
+      baseXp:   1500,
+      eyebrow:  'Ordained Battle — The Final Reckoning',
+
+      passage:  'This is what all of it was for. Not the medals — those are objects. Not the finish times — those are numbers. This is for the fact that you became something different from what you were in February. The Spire does not care who you were. It cares who crossed its threshold. You did. The road is complete. The world is changed.',
+
+      branches: [
+        {
+          id:    'hard',
+          name:  'The Hard Crossing',
+          desc:  'Survived the Trifecta. The full weekend, all three distances. It was earned through endurance alone.',
+          xpMult: 1.0,
+          statBonus:  null,
+          statBonus2: null,
+          abilityId:  null,
+          rewardText: 'Base XP only. The road is complete.'
+        },
+        {
+          id:    'earned',
+          name:  'The Earned Fight',
+          desc:  'Completed. Held every element of what was trained. The Spire was taken methodically.',
+          xpMult: 1.25,
+          statBonus:  { stat: '__highest__', amount: 20 },
+          statBonus2: null,
+          abilityId:  null,
+          rewardText: '+20 to highest stat'
+        },
+        {
+          id:    'threshold',
+          name:  'Beyond the Threshold',
+          desc:  'The Trifecta is complete. The Black Spire is behind you. The world is different.',
+          xpMult: 1.50,
+          statBonus:  { stat: '__highest__', amount: 20 },
+          statBonus2: { stat: 'resolve',     amount: 12 },
+          abilityId:  'word_of_spire',
+          rewardText: '+20 highest stat · +12 Resolve · Word of the Spire'
+        }
+      ],
+
+      resultPassages: {
+        hard:      'The Trifecta is done. All three. The road that began in February is complete. You are not the same person who started it.',
+        earned:    'The Spire fell. Everything you built — the early mornings, the logged sessions, the choices — it held. The story is complete.',
+        threshold: 'Beyond the Threshold. The world has transformed. The Black Spire is behind you, and you carry something home from it that no one else can name.'
+      }
+    }
+  ];
+
+  /* -- Ordained-specific abilities --------------------------- */
+  var ORDAINED_ABILITIES = [
+    { id: 'gatekeepers_knowledge', name: "Gatekeeper's Knowledge",
+      effect: '-15% enemy damage on Round 1 of every encounter.' },
+    { id: 'ashwood_pace',          name: 'Ashwood Pace',
+      effect: '-10% HP loss in sustained rounds (rounds 4+).' },
+    { id: 'valdenmoors_weight',    name: "Valdenmoor's Weight",
+      effect: '175% Strike damage, 18 Mana.' },
+    { id: 'word_of_spire',         name: 'Word of the Spire',
+      effect: 'Strongest ability. Deals 400% damage, 30 Mana. Once per day.' }
+  ];
+
+  /* -- State ------------------------------------------------- */
+  var OB = {
+    race:           null,   /* current ORDAINED_RACES entry */
+    selectedBranch: null
+  };
+
+  /* -- Determine which race is available to the player ------- */
+  function getAvailableRace(data) {
+    var today    = new Date().toISOString().slice(0, 10);
+    var ordained = data.ordained || {};
+
+    for (var i = 0; i < ORDAINED_RACES.length; i++) {
+      var race = ORDAINED_RACES[i];
+      /* Already completed? */
+      if (ordained[race.id]) continue;
+      /* Date not reached yet? */
+      if (today < race.date) continue;
+      /* This race is available */
+      return race;
+    }
+    return null; /* all complete, or none available yet */
+  }
+
+  /* -- Update "The World" button state on home screen -------- */
+  function updateWorldButton(data) {
+    var btns = document.querySelectorAll('.action-btn');
+    var worldBtn = btns[2]; /* third action button */
+    if (!worldBtn) return;
+
+    var race = getAvailableRace(data);
+    var subEl = worldBtn.querySelector('.btn-sub');
+
+    if (race) {
+      worldBtn.classList.add('race-available');
+      worldBtn.classList.remove('race-locked');
+      if (subEl) subEl.textContent = race.name;
+    } else {
+      var ordained = data.ordained || {};
+      var allDone  = ORDAINED_RACES.every(function(r) { return ordained[r.id]; });
+      worldBtn.classList.remove('race-available');
+      worldBtn.classList.add('race-locked');
+      if (subEl) {
+        subEl.textContent = allDone
+          ? 'All races complete'
+          : 'Next race not yet';
+      }
+    }
+  }
+
+  /* -- Open ordained battle screen --------------------------- */
+  function openOrdained() {
+    var data = loadData();
+    if (!data) return;
+
+    var race = getAvailableRace(data);
+    if (!race) {
+      /* No race available — could show a message, but brief says button is always visible */
+      return;
+    }
+
+    OB.race           = race;
+    OB.selectedBranch = null;
+
+    /* Populate header */
+    document.getElementById('ordained-eyebrow').textContent  = race.eyebrow;
+    document.getElementById('ordained-title').textContent    = race.name;
+    document.getElementById('ordained-subtitle').textContent = race.subtitle;
+    document.getElementById('ordained-passage').textContent  = race.passage;
+
+    /* Render branch cards */
+    var container = document.getElementById('ordained-branches');
+    container.innerHTML = '';
+
+    race.branches.forEach(function(branch) {
+      var card = document.createElement('div');
+      card.className = 'ordained-branch-card';
+      card.setAttribute('data-branch-id', branch.id);
+
+      /* Reward chips */
+      var chips = '';
+      chips += '<span class="ordained-reward-chip">+' + Math.round(race.baseXp * branch.xpMult) + ' XP</span>';
+      if (branch.statBonus)  chips += '<span class="ordained-reward-chip highlight">' + formatStatBonus(branch.statBonus)  + '</span>';
+      if (branch.statBonus2) chips += '<span class="ordained-reward-chip highlight">' + formatStatBonus(branch.statBonus2) + '</span>';
+      if (branch.abilityId)  chips += '<span class="ordained-reward-chip highlight">Ability Unlocked</span>';
+
+      card.innerHTML =
+        '<div class="ordained-branch-name">' + branch.name + '</div>' +
+        '<div class="ordained-branch-desc">' + branch.desc + '</div>' +
+        '<div class="ordained-branch-rewards">' + chips + '</div>';
+
+      card.addEventListener('click', function() { selectOrdainedBranch(branch.id); });
+      container.appendChild(card);
+    });
+
+    /* Reset commit button */
+    document.getElementById('ordained-commit-btn').classList.remove('visible');
+
+    document.getElementById('ordainedOverlay').classList.add('visible');
+  }
+
+  function formatStatBonus(bonus) {
+    if (!bonus) return '';
+    if (bonus.stat === '__highest__') return '+' + bonus.amount + ' highest stat';
+    var label = bonus.stat.charAt(0).toUpperCase() + bonus.stat.slice(1);
+    return '+' + bonus.amount + ' ' + label;
+  }
+
+  /* -- Select branch ----------------------------------------- */
+  function selectOrdainedBranch(branchId) {
+    document.querySelectorAll('.ordained-branch-card').forEach(function(c) {
+      c.classList.toggle('selected', c.getAttribute('data-branch-id') === branchId);
+    });
+    OB.selectedBranch = branchId;
+    document.getElementById('ordained-commit-btn').classList.add('visible');
+  }
+
+  function closeOrdained() {
+    document.getElementById('ordainedOverlay').classList.remove('visible');
+    OB.race = null; OB.selectedBranch = null;
+  }
+
+  /* -- Confirm branch and apply rewards ---------------------- */
+  function confirmOrdinedBranch() {
+    if (!OB.race || !OB.selectedBranch) return;
+    var data = loadData();
+    if (!data) return;
+
+    var race   = OB.race;
+    var branch = race.branches.find(function(b) { return b.id === OB.selectedBranch; });
+    if (!branch) return;
+
+    /* -- Apply XP -- */
+    var xpGain = Math.round(race.baseXp * branch.xpMult);
+    data.character.xp = (data.character.xp || 0) + xpGain;
+
+    /* -- Apply stat bonuses -- */
+    function applyStat(bonus) {
+      if (!bonus) return;
+      if (bonus.stat === '__highest__') {
+        /* Find the highest stat */
+        var stats  = data.stats;
+        var best   = 'endurance';
+        var bestV  = 0;
+        ['endurance','iron','force','core','resolve','lore'].forEach(function(s) {
+          if ((stats[s] || 0) > bestV) { bestV = stats[s] || 0; best = s; }
+        });
+        data.stats[best] = Math.min(100, (data.stats[best] || 0) + bonus.amount);
+      } else {
+        data.stats[bonus.stat] = Math.min(100, (data.stats[bonus.stat] || 0) + bonus.amount);
+      }
+    }
+    applyStat(branch.statBonus);
+    applyStat(branch.statBonus2);
+
+    /* -- Apply ability -- */
+    var abilityUnlocked = null;
+    if (branch.abilityId) {
+      if (!data.abilities) data.abilities = { owned: [] };
+      if (data.abilities.owned.indexOf(branch.abilityId) === -1) {
+        data.abilities.owned.push(branch.abilityId);
+      }
+      abilityUnlocked = ORDAINED_ABILITIES.find(function(a) { return a.id === branch.abilityId; });
+    }
+
+    /* -- Mark race complete -- */
+    if (!data.ordained) data.ordained = {};
+    data.ordained[race.id] = OB.selectedBranch; /* store which branch was chosen */
+
+    /* -- Check for level up -- */
+    var didLevelUp = checkLevelUp(data);
+    var newLevel   = data.character.level;
+
+    saveData(data);
+    populateHomeScreen(data);
+    closeOrdained();
+
+    /* -- Show result -- */
+    showOrdainedResult(race, branch, xpGain, abilityUnlocked, branch.statBonus, branch.statBonus2, data);
+
+    /* Queue level up if triggered */
+    if (didLevelUp) {
+      window._levelUpQueued = { level: newLevel };
+    }
+  }
+
+  /* -- Show ordained result screen --------------------------- */
+  function showOrdainedResult(race, branch, xpGain, ability, bonus1, bonus2, data) {
+    document.getElementById('ordained-result-icon').textContent    = '⚔️';
+    document.getElementById('ordained-result-title').textContent   = branch.name;
+    document.getElementById('ordained-result-race').textContent    = race.name.toUpperCase() + ' · ' + race.subtitle;
+
+    /* Rewards rows */
+    var rewardsEl = document.getElementById('ordained-result-rewards');
+    rewardsEl.innerHTML = '';
+
+    function addRewardRow(label, value) {
+      var row = document.createElement('div');
+      row.className = 'ordained-result-reward-row';
+      row.innerHTML =
+        '<span class="ordained-result-reward-label">' + label + '</span>' +
+        '<span class="ordained-result-reward-value">' + value + '</span>';
+      rewardsEl.appendChild(row);
+    }
+
+    addRewardRow('XP Earned', '+' + xpGain);
+
+    if (bonus1) {
+      addRewardRow(
+        bonus1.stat === '__highest__' ? 'Highest Stat' : bonus1.stat.charAt(0).toUpperCase() + bonus1.stat.slice(1),
+        '+' + bonus1.amount
+      );
+    }
+    if (bonus2) {
+      addRewardRow(
+        bonus2.stat === '__highest__' ? 'Resolve' : bonus2.stat.charAt(0).toUpperCase() + bonus2.stat.slice(1),
+        '+' + bonus2.amount
+      );
+    }
+
+    /* Ability block */
+    var abilityEl = document.getElementById('ordained-result-ability');
+    if (ability) {
+      abilityEl.style.display = 'block';
+      document.getElementById('ordained-result-ability-name').textContent   = ability.name;
+      document.getElementById('ordained-result-ability-effect').textContent = ability.effect;
+    } else {
+      abilityEl.style.display = 'none';
+    }
+
+    /* Passage */
+    var passage = race.resultPassages[branch.id] || '';
+    document.getElementById('ordained-result-passage').textContent = '"' + passage + '"';
+
+    document.getElementById('ordainedResultOverlay').classList.add('visible');
+  }
+
+  function closeOrdainedResult() {
+    document.getElementById('ordainedResultOverlay').classList.remove('visible');
+    /* Fire queued level-up if present */
+    if (window._levelUpQueued) {
+      var queued = window._levelUpQueued;
+      window._levelUpQueued = null;
+      var data = loadData();
+      if (data) showLevelUp(queued.level, data);
+    }
+  }
+
+  /* -- Wire "The World" button ------------------------------- */
+  document.addEventListener('DOMContentLoaded', function() {
+    var btns = document.querySelectorAll('.action-btn');
+    if (btns[2]) btns[2].addEventListener('click', function() {
+      var data = loadData();
+      if (data && data.setupComplete) openOrdained();
+    });
+  });
+
+  /* -- Patch populateHomeScreen to update World button ------- */
+  var _origPopulateHome4 = populateHomeScreen;
+  populateHomeScreen = function(data) {
+    _origPopulateHome4(data);
+    updateWorldButton(data);
+  };
+
+  /* -- Apply ordained abilities in combat -------------------- */
+  /* Gatekeeper's Knowledge: -15% damage Round 1 */
+  /* Applied inside calcMonsterDamage — check CS.round and owned abilities */
+  /* Ashwood Pace: -10% HP loss rounds 4+ */
+  /* Valdenmoor's Weight: active ability (handled as combatAbilityAction) */
+  /* Word of the Spire: active ability (handled as combatAbilityAction) */
+
+
+
+  /* ============================================================
+     PHASE 10 — THE RECORD, EXPORT, & POLISH
+  ============================================================ */
+
+  /* -- Daily flavour text pool (home screen band) ----------- */
+  var HOME_FLAVOUR = [
+    "You are here. That is more than most. Begin.",
+    "The road does not care what you did yesterday.",
+    "What you build today exists tomorrow. What you skip today also exists tomorrow.",
+    "The Reaches are cold in the morning. Train anyway.",
+    "Every number on this screen was earned. None of them were given.",
+    "The body keeps the account. You simply log it.",
+    "Hard mornings build October.",
+    "The streak is a record of choices. Keep adding to it.",
+    "Consistency is the only thing the road respects.",
+    "The Iron Gate is closer today than it was yesterday.",
+    "Endurance is not a stat. It is a posture toward difficulty.",
+    "Rest when rest is earned. Work when work is due.",
+    "The Reaches watch. They do not cheer. They note.",
+    "Progress is quiet. So is this app. So is the work.",
+    "The Black Spire is visible from here if the weather is right."
+  ];
+
+  function getDailyFlavour() {
+    /* Deterministic by day-of-year so it changes daily but not on refresh */
+    var now  = new Date();
+    var doy  = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+    return '"' + HOME_FLAVOUR[doy % HOME_FLAVOUR.length] + '"';
+  }
+
+  /* -- Session type readable labels ------------------------- */
+  var SESSION_TYPE_LABELS = {
+    strength:    'Strength',
+    endurance:   'Endurance',
+    power:       'Power',
+    restoration: 'Restoration',
+    mixed:       'Mixed'
+  };
+
+  /* -- Build a one-line summary from log entry deltas -------- */
+  function buildEntrySummary(entry) {
+    var parts = [];
+    var d     = entry.deltas || {};
+    var order = ['endurance','iron','force','core','resolve','lore'];
+    order.forEach(function(s) {
+      if ((d[s] || 0) > 0) {
+        parts.push(s.charAt(0).toUpperCase() + s.slice(1) + ' +' + d[s].toFixed(1));
+      }
+    });
+    if (!parts.length) return 'No stats recorded';
+    return parts.join(' · ');
+  }
+
+  /* -- Format date for display ------------------------------- */
+  function formatEntryDate(dateStr) {
+    if (!dateStr) return '—';
+    var d   = new Date(dateStr + 'T00:00:00');
+    var opts = { month: 'short', day: 'numeric', year: 'numeric' };
+    return d.toLocaleDateString('en-CA', opts);
+  }
+
+  /* -- Open The Record --------------------------------------- */
+  function openRecord() {
+    var data = loadData();
+    if (!data) return;
+
+    var log = (data.log || []).slice().reverse(); /* reverse-chronological */
+
+    /* Summary stats */
+    var totalSessions = log.length;
+    var uniqueDays    = new Set((data.log || []).map(function(e) { return e.date; })).size;
+    var totalXp       = data.character.xp || 0;
+    var bestStreak    = data.streaks.bestTraining || data.streaks.training || 0;
+
+    document.getElementById('rec-total-sessions').textContent = totalSessions;
+    document.getElementById('rec-total-days').textContent     = uniqueDays;
+    document.getElementById('rec-best-streak').textContent    = bestStreak;
+    document.getElementById('rec-total-xp').textContent       = totalXp;
+    document.getElementById('record-count').textContent       =
+      totalSessions + (totalSessions === 1 ? ' session logged' : ' sessions logged');
+
+    /* Build entry list */
+    var body = document.getElementById('record-body');
+    body.innerHTML = '';
+
+    if (!log.length) {
+      body.innerHTML = '<div class="record-empty">No sessions logged yet. Begin.</div>';
+    } else {
+      log.forEach(function(entry, idx) {
+        var entryEl = document.createElement('div');
+        entryEl.className = 'record-entry';
+
+        var header = document.createElement('div');
+        header.className = 'record-entry-header';
+
+        var typeLabel = SESSION_TYPE_LABELS[entry.sessionType] || entry.sessionType || '—';
+        var summary   = buildEntrySummary(entry);
+
+        header.innerHTML =
+          '<span class="record-entry-date">'    + formatEntryDate(entry.date) + '</span>' +
+          '<span class="record-entry-type">'    + typeLabel + '</span>' +
+          '<span class="record-entry-summary">' + summary   + '</span>' +
+          '<span class="record-entry-chevron">▾</span>';
+
+        /* Expanded detail panel */
+        var detail = document.createElement('div');
+        detail.className = 'record-entry-detail';
+
+        var d = entry.deltas || {};
+        var cells = '';
+        var statOrder = ['endurance','iron','force','core','resolve','lore'];
+        statOrder.forEach(function(s) {
+          var v = d[s] || 0;
+          cells +=
+            '<div class="record-detail-cell">' +
+              '<span class="record-detail-label">' + s + '</span>' +
+              '<span class="record-detail-value' + (v > 0 ? ' positive' : '') + '">' +
+                (v > 0 ? '+' + v.toFixed(1) : '—') +
+              '</span>' +
+            '</div>';
+        });
+        if (entry.manaGain) {
+          cells +=
+            '<div class="record-detail-cell">' +
+              '<span class="record-detail-label">Mana</span>' +
+              '<span class="record-detail-value positive">+' + entry.manaGain + '</span>' +
+            '</div>';
+        }
+        detail.innerHTML = '<div class="record-detail-grid">' + cells + '</div>';
+
+        /* Toggle */
+        header.addEventListener('click', function() {
+          var open = header.classList.contains('open');
+          header.classList.toggle('open', !open);
+          detail.classList.toggle('open', !open);
+        });
+
+        entryEl.appendChild(header);
+        entryEl.appendChild(detail);
+        body.appendChild(entryEl);
+      });
+    }
+
+    document.getElementById('recordOverlay').classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeRecord() {
+    document.getElementById('recordOverlay').classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+
+  /* -- Export Data as JSON backup ---------------------------- */
+  function exportData() {
+    var data = loadData();
+    if (!data) { alert('No data to export.'); return; }
+
+    var json     = JSON.stringify(data, null, 2);
+    var blob     = new Blob([json], { type: 'application/json' });
+    var url      = URL.createObjectURL(blob);
+    var dateStr  = new Date().toISOString().slice(0, 10);
+    var filename = 'ashen-reaches-backup-' + dateStr + '.json';
+
+    var a    = document.createElement('a');
+    a.href   = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  /* -- Wire The Record button (btns[3]) ---------------------- */
+  document.addEventListener('DOMContentLoaded', function() {
+    var btns = document.querySelectorAll('.action-btn');
+    if (btns[3]) btns[3].addEventListener('click', function() {
+      var data = loadData();
+      if (data && data.setupComplete) openRecord();
+    });
+  });
+
+  /* -- Polish: daily flavour text on home screen ------------- */
+  var _origPopulateHome5 = populateHomeScreen;
+  populateHomeScreen = function(data) {
+    _origPopulateHome5(data);
+    var flavourEl = document.getElementById('flavourText');
+    if (flavourEl) flavourEl.textContent = getDailyFlavour();
+  };
+
+  /* -- Polish: track best streak ----------------------------- */
+  /* Called after streak increments in commitLog */
+  function updateBestStreaks(data) {
+    var training = data.streaks.training || 0;
+    var resolve  = data.streaks.resolve  || 0;
+    if (!data.streaks.bestTraining || training > data.streaks.bestTraining) {
+      data.streaks.bestTraining = training;
+    }
+    if (!data.streaks.bestResolve || resolve > data.streaks.bestResolve) {
+      data.streaks.bestResolve = resolve;
+    }
+  }
+
+  /* -- Polish: apply ordained passive abilities in combat -----
+     Gatekeeper's Knowledge: -15% enemy damage Round 1
+     Ashwood Pace:            -10% HP loss in sustained rounds (4+)
+     Valdenmoor's Weight:     175% strike, 18 Mana (active — added to combat btns)
+     Word of the Spire:       400% strike, once per day (active — added to combat btns)
+  ----------------------------------------------------------- */
+
+  /* Extend ABILITIES array with ordained active abilities for combat */
+  ABILITIES.push(
+    { id:'valdenmoors_weight', branch:'ordained', name:"Valdenmoor's Weight",
+      type:'active',  levelReq:1, statReq:{},
+      cost:18, costLabel:'18 Mana',
+      effect:'175% Strike damage.',
+      combatEffect:'strike_multiplier', value:1.75 },
+    { id:'word_of_spire', branch:'ordained', name:'Word of the Spire',
+      type:'active',  levelReq:1, statReq:{},
+      cost:30, costLabel:'30 Mana',
+      effect:'400% Strike damage. Once per day.',
+      combatEffect:'strike_multiplier_once_day', value:4.0 }
+  );
+
+  /* Extend combatAbilityAction to handle ordained actives */
+  var _origCombatAbility = combatAbilityAction;
+  combatAbilityAction = function(abilityId) {
+    /* Valdenmoor's Weight */
+    if (abilityId === 'valdenmoors_weight') {
+      if (!CS.active) return;
+      var data = loadData();
+      if (!data) return;
+      if (CS.mana < 18) { addCombatLog("Not enough Mana for Valdenmoor's Weight.", 'system-note'); return; }
+      disableCombatButtons();
+      CS.mana -= 18;
+      renderCombatManaPips();
+      CS.lastAction = abilityId;
+      var r = calcPlayerDamage(data, 1.75);
+      CS.monsterHp -= r.dmg;
+      addCombatLog("Valdenmoor's Weight — " + r.dmg + ' damage (175%).', 'player-action');
+      animateMonsterStruck();
+      updateCombatBars();
+      if (CS.monsterHp <= 0) { resolveVictory(data); return; }
+      setTimeout(function() { executeMonsterTurn(data); }, 600);
+      return;
+    }
+
+    /* Word of the Spire */
+    if (abilityId === 'word_of_spire') {
+      if (!CS.active) return;
+      var data = loadData();
+      if (!data) return;
+      var today = new Date().toISOString().slice(0,10);
+      if (CS.wordOfSourceDate === today) { addCombatLog('Word of the Spire already used today.', 'system-note'); return; }
+      if (CS.mana < 30) { addCombatLog('Not enough Mana for Word of the Spire.', 'system-note'); return; }
+      disableCombatButtons();
+      CS.mana -= 30;
+      CS.wordOfSourceDate = today;
+      if (!data.abilities) data.abilities = { owned: [] };
+      data.abilities.wordOfSourceDate = today;
+      saveData(data);
+      renderCombatManaPips();
+      CS.lastAction = abilityId;
+      var r = calcPlayerDamage(data, 4.0);
+      CS.monsterHp -= r.dmg;
+      addCombatLog('Word of the Spire — ' + r.dmg + ' damage.', 'player-action');
+      animateMonsterStruck();
+      updateCombatBars();
+      if (CS.monsterHp <= 0) { resolveVictory(data); return; }
+      setTimeout(function() { executeMonsterTurn(data); }, 600);
+      return;
+    }
+
+    /* Delegate all others */
+    _origCombatAbility(abilityId);
+  };
+
+  /* -- Polish: Gatekeeper's Knowledge passively in monster dmg */
+  /* Patch calcMonsterDamage inline — add at start of function  */
+  var _origCalcMonsterDmg = calcMonsterDamage;
+  calcMonsterDamage = function() {
+    var dmg = _origCalcMonsterDmg();
+    /* Gatekeeper's Knowledge: -15% enemy damage on Round 1 */
+    if (CS.round === 1 && hasAbility('gatekeepers_knowledge')) {
+      dmg = Math.max(1, Math.round(dmg * 0.85));
+      addCombatLog("Gatekeeper's Knowledge: Round 1 damage reduced 15%.", 'system-note');
+    }
+    /* Ashwood Pace: -10% HP loss in sustained rounds (round 4+) */
+    if (CS.round >= 4 && hasAbility('ashwood_pace')) {
+      dmg = Math.max(1, Math.round(dmg * 0.90));
+    }
+    return dmg;
+  };
+
+  /* -- Polish: wire updateBestStreaks into commitLog -----------
+     We patch the saveData call in commitLog by wrapping it.
+     The neatest hook is to extend saveData itself. ------------ */
+  var _origSaveData = saveData;
+  saveData = function(data) {
+    if (data && data.streaks) updateBestStreaks(data);
+    _origSaveData(data);
+  };
+
+  /* -- Polish: race countdown updates to next upcoming race --- */
+  /* The base populateHomeScreen only counts down to May 23.
+     Patch it to always show the next upcoming ordained race.    */
+  var _origPopulateHome6 = populateHomeScreen;
+  populateHomeScreen = function(data) {
+    _origPopulateHome6(data);
+
+    var ordained = (data && data.ordained) || {};
+    var today    = new Date(); today.setHours(0,0,0,0);
+
+    var nextRace = null;
+    for (var i = 0; i < ORDAINED_RACES.length; i++) {
+      var r     = ORDAINED_RACES[i];
+      var rDate = new Date(r.date + 'T00:00:00');
+      if (!ordained[r.id]) { nextRace = { race: r, date: rDate }; break; }
+    }
+
+    var el = document.getElementById('daysUntil');
+    if (!el) return;
+
+    if (!nextRace) {
+      el.innerHTML = 'Complete <span>— Trifecta Done</span>';
+      el.style.color = 'var(--ember)';
+      return;
+    }
+
+    var diff = Math.ceil((nextRace.date - today) / 86400000);
+    var name = nextRace.race.name;
+
+    if (diff > 0) {
+      el.innerHTML  = diff + ' <span>Days — ' + name + '</span>';
+      el.style.color = '';
+    } else if (diff === 0) {
+      el.innerHTML  = 'Today <span>— ' + name + '</span>';
+      el.style.color = 'var(--ember)';
+    } else {
+      el.innerHTML  = 'Available <span>— ' + name + '</span>';
+      el.style.color = 'var(--ironstone)';
     }
   };
 
