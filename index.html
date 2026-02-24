@@ -5062,11 +5062,18 @@
       data.combat = { ventureBlockedDate: null, encountersToday: 0, lastEncounterDate: null };
     }
 
-    /* Reset daily counter if new day */
+    /* Reset daily counter and restore HP to full if new day */
     var today = new Date().toISOString().slice(0,10);
     if (data.combat.lastEncounterDate !== today) {
       data.combat.encountersToday = 0;
       data.combat.lastEncounterDate = today;
+      /* HP restores fully at the start of each new day */
+      var lvl2      = data.character.level || 1;
+      var core2     = data.stats ? (data.stats.core || 0) : 0;
+      var freshMaxHp = (lvl2 * 10) + Math.floor(core2 / 10 * 5) + 40;
+      data.character.hp    = freshMaxHp;
+      data.character.maxHp = freshMaxHp;
+      saveData(data);
     }
 
     CS.encountersToday = data.combat.encountersToday || 0;
@@ -5751,7 +5758,12 @@
     if (!data.combat) data.combat = {};
     var today = new Date().toISOString().slice(0,10);
     data.combat.ventureBlockedDate = today;
-    data.character.hp   = data.character.maxHp || CS.playerMaxHp;
+    /* Recalculate maxHp fresh — don't rely on stored field which may be stale */
+    var defeatLvl    = data.character.level || 1;
+    var defeatCore   = data.stats ? (data.stats.core || 0) : 0;
+    var defeatMaxHp  = (defeatLvl * 10) + Math.floor(defeatCore / 10 * 5) + 40;
+    data.character.hp    = defeatMaxHp;
+    data.character.maxHp = defeatMaxHp;
     data.character.mana = CS.mana; /* mana does not restore on defeat */
     saveData(data);
     populateHomeScreen(data);
