@@ -4202,29 +4202,6 @@
   }
 
   /* ============================================================
-     INIT
-  ============================================================ */
-  (function init() {
-    var data = loadData();
-    if (data && data.setupComplete) {
-      document.getElementById('setupOverlay').style.display = 'none';
-
-      /* Phase 4: run streak health checks before displaying home screen */
-      checkResolveStreak(data);
-      checkRestorationStreak(data);
-
-      /* Re-load after possible saves inside checks */
-      data = loadData();
-
-      populateHomeScreen(data);
-
-      /* Phase 4: check for absence tier message */
-      checkAbsenceOnLogin(data);
-    }
-    /* else: setup overlay is already visible by default */
-  })();
-
-  /* ============================================================
      PHASE 3 — LOGGING SCREEN
   ============================================================ */
 
@@ -7173,6 +7150,30 @@
       el.style.color = 'var(--ironstone)';
     }
   };
+
+
+  /* ============================================================
+     INIT — runs last so all patches and functions are defined
+  ============================================================ */
+  (function init() {
+    var data = loadData();
+    if (data && data.setupComplete) {
+      document.getElementById('setupOverlay').style.display = 'none';
+
+      /* Phase 4: run streak health checks before displaying home screen */
+      checkResolveStreak(data);
+      checkRestorationStreak(data);
+
+      /* Re-load after possible saves inside checks */
+      data = loadData();
+
+      populateHomeScreen(data);
+
+      /* Phase 4: check for absence tier message */
+      checkAbsenceOnLogin(data);
+    }
+    /* else: setup overlay is already visible by default */
+  })();
 
 
 
