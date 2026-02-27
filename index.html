@@ -2871,6 +2871,28 @@
     .export-btn:hover::before { background: var(--ironstone); }
 
 
+    /* No abilities available notice */
+    .abilities-none-notice {
+      padding: 24px 20px;
+      text-align: center;
+      border: 1px solid var(--ironstone-dim);
+      border-radius: 2px;
+      background: #1a1714;
+      margin-top: 12px;
+    }
+
+    .abilities-none-notice p {
+      font-family: 'IM Fell English', serif;
+      font-style: italic;
+      font-size: 0.88rem;
+      color: var(--ironstone);
+      line-height: 1.7;
+      margin: 0 0 8px;
+    }
+
+    .abilities-none-notice p:last-child { margin-bottom: 0; }
+
+
   </style>
 </head>
 <body>
@@ -5712,7 +5734,7 @@
     CS.encountersToday = data.combat.encountersToday;
 
     /* Update XP bar on home screen */
-    var xpThresholds = [0,200,500,900,1400,2000,2700,3500,4400,5400];
+    var xpThresholds = [0,200,600,1800,5400,16200,48600,145800,437400,1312200];
     var lvl = data.character.level || 1;
     var xpNeeded = xpThresholds[Math.min(lvl, xpThresholds.length - 1)];
     var xpCurrent = data.character.xp;
@@ -5817,7 +5839,7 @@
   populateHomeScreen = function(data) {
     _origPopulateHome(data);
     /* XP bar update */
-    var xpThresholds = [200, 500, 900, 1400, 2000, 2700, 3500, 4400, 5400, 99999];
+    var xpThresholds = [200, 600, 1800, 5400, 16200, 48600, 145800, 437400, 1312200, 99999];
     var lvl      = (data.character.level || 1) - 1;
     var prevXp   = lvl > 0 ? [0,200,500,900,1400,2000,2700,3500,4400][lvl] : 0;
     var nextXp   = xpThresholds[Math.min(lvl, xpThresholds.length - 1)];
@@ -5830,8 +5852,9 @@
     var xpLabel = document.querySelector('.xp-label');
     var xpVal   = document.querySelector('.xp-bar-wrap .meta-value');
     if (xpFill)  xpFill.style.width = pct + '%';
-    if (xpLabel) xpLabel.textContent = 'Next Level: ' + (nextXp - curXp) + ' XP required';
-    if (xpVal)   xpVal.textContent   = curXp + ' / ' + nextXp + ' XP';
+    if (xpLabel) xpLabel.textContent = 'Next Level: ' + Math.max(0, nextXp - curXp) + ' XP required';
+    /* Show progress within this level only (resets visually each level) */
+    if (xpVal)   xpVal.textContent   = Math.max(0, xpIntoLvl) + ' / ' + xpRange + ' XP';
   };
 
 
@@ -5841,7 +5864,7 @@
   ============================================================ */
 
   /* -- XP thresholds (index = level needed to reach) -------- */
-  var XP_THRESHOLDS = [0, 200, 500, 900, 1400, 2000, 2700, 3500, 4400, 5400];
+  var XP_THRESHOLDS = [0, 200, 600, 1800, 5400, 16200, 48600, 145800, 437400, 1312200];
 
   /* -- Roman numerals ---------------------------------------- */
   var ROMAN = ['', 'I','II','III','IV','V','VI','VII','VIII','IX','X'];
@@ -6067,6 +6090,26 @@
 
       container.appendChild(branchEl);
     });
+
+    /* If nothing is unlockable, show a clear message */
+    var unlockableCards = container.querySelectorAll('.ability-card.unlockable');
+    if (unlockableCards.length === 0) {
+      var notice = document.createElement('div');
+      notice.className = 'abilities-none-notice';
+      notice.innerHTML =
+        '<p>No abilities are available yet at this level.</p>' +
+        '<p>Your stats have not reached the required thresholds. ' +
+        'Continue training to unlock abilities at future level-ups.</p>';
+      container.appendChild(notice);
+
+      /* Make the skip button primary when nothing is selectable */
+      var skipBtn = document.querySelector('.levelup-skip-btn');
+      if (skipBtn) {
+        skipBtn.textContent = 'Continue — return when ready';
+        skipBtn.style.color = 'var(--parchment)';
+        skipBtn.style.fontSize = '0.75rem';
+      }
+    }
   }
 
   /* -- Handle ability selection ------------------------------ */
@@ -6148,27 +6191,42 @@
     var level = data.character.level || 1;
     if (level >= 10) return false;  /* max level */
 
-    var xp      = data.character.xp || 0;
-    var needed  = XP_THRESHOLDS[level]; /* threshold to reach level+1 */
+    var xp     = data.character.xp || 0;
+    var needed = XP_THRESHOLDS[level]; /* cumulative XP needed to reach level+1 */
     if (!needed) return false;
 
-    if (xp >= needed) {
-      /* Level up */
-      data.character.level = level + 1;
+    /* XP gate */
+    if (xp < needed) return false;
 
-      /* Recalculate max HP and max Mana at new level */
-      var coreStat    = data.stats.core    || 0;
-      var resolveStat = data.stats.resolve || 0;
-      data.character.maxHp   = (data.character.level * 10) + Math.floor(coreStat / 10 * 5) + 40;
-      data.character.maxMana = 30 + Math.floor(resolveStat / 10 * 5) + (data.character.level * 3);
+    /* Stat floor gate: highest single stat must be >= level * 10
+       e.g. level 1->2 requires one stat >= 10, level 2->3 requires >= 20, etc.
+       This ensures the ability tree has something to offer when it unlocks. */
+    var statFloor = level * 10;
+    var stats     = data.stats || {};
+    var highStat  = Math.max(
+      stats.endurance || 0,
+      stats.iron      || 0,
+      stats.force     || 0,
+      stats.core      || 0,
+      stats.resolve   || 0,
+      stats.lore      || 0
+    );
+    if (highStat < statFloor) return false;
 
-      /* Restore HP to new max on level up */
-      data.character.hp = data.character.maxHp;
+    /* Both gates passed — level up */
+    data.character.level = level + 1;
 
-      saveData(data);
-      return true;
-    }
-    return false;
+    /* Recalculate max HP and max Mana at new level */
+    var coreStat    = data.stats.core    || 0;
+    var resolveStat = data.stats.resolve || 0;
+    data.character.maxHp   = (data.character.level * 10) + Math.floor(coreStat / 10 * 5) + 40;
+    data.character.maxMana = 30 + Math.floor(resolveStat / 10 * 5) + (data.character.level * 3);
+
+    /* Restore HP to new max on level up */
+    data.character.hp = data.character.maxHp;
+
+    saveData(data);
+    return true;
   }
 
   /* -- Update home screen level display --------------------- */
