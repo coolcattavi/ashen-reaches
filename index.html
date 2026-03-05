@@ -5054,18 +5054,52 @@
   /* -- Select appropriate monster --------------------------- */
   function selectMonster(data) {
     var level = data.character.level || 1;
-    /* Tier availability per level */
-    var maxTier = level >= 6 ? 5 : level >= 4 ? 3 : level >= 2 ? 2 : 1;
 
-    /* Escalation: each victory today pushes tier up by 1 */
-    var escalation = CS.encountersToday;
-    var targetTier = Math.min(5, Math.max(1, maxTier - (maxTier - 1) + escalation));
-    /* Simpler: base = 1, escalation adds tiers, cap at maxTier */
-    targetTier = Math.min(maxTier, 1 + escalation);
+    /* Absolute ceiling: tiers available scale with level */
+    var maxTier = level >= 6 ? 5 : level >= 4 ? 4 : level >= 3 ? 3 : level >= 2 ? 2 : 1;
 
-    var pool = MONSTERS.filter(function(m) { return m.tier === targetTier; });
-    if (!pool.length) pool = MONSTERS.filter(function(m) { return m.tier === 1; });
+    /* Floor rule 1: player level sets the base minimum.
+       A Level 2 player can never face a Tier 1 monster.
+       A Level 3 player can never face Tier 1 or 2. Etc. */
+    var levelFloor = level;
+
+    /* Floor rule 2: each encounter today must be strictly harder than the last.
+       Find the highest tier already fought today, next must be at least that + 1. */
+    var tiersFought = (data.combat && data.combat.tiersFoughtToday) || [];
+    var highestFought = tiersFought.length
+      ? Math.max.apply(null, tiersFought)
+      : 0;
+    var escalationFloor = highestFought + 1;
+
+    /* The actual minimum is whichever floor is higher */
+    var minTier = Math.max(levelFloor, escalationFloor);
+
+    /* No valid tier exists within ceiling */
+    if (minTier > maxTier) return null;
+
+    /* Pick the minimum valid tier — lowest rung above both floors */
+    var pool = MONSTERS.filter(function(m) { return m.tier === minTier; });
+    if (!pool.length) return null;
     return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  /* -- Daily HP + combat state reset (called on login and on venture out) */
+  function applyDailyReset(data) {
+    var today = new Date().toISOString().slice(0,10);
+    if (!data.combat) data.combat = {};
+    if (data.combat.lastEncounterDate !== today) {
+      data.combat.encountersToday   = 0;
+      data.combat.lastEncounterDate = today;
+      data.combat.tiersFoughtToday  = [];
+      var lvl       = data.character.level || 1;
+      var coreStat  = data.stats ? (data.stats.core || 0) : 0;
+      var newMaxHp  = (lvl * 10) + Math.floor(coreStat / 10 * 5) + 40;
+      data.character.hp    = newMaxHp;
+      data.character.maxHp = newMaxHp;
+      saveData(data);
+      return true; /* did reset */
+    }
+    return false;
   }
 
   /* -- Open Venture Out (encounter preview) --------------- */
@@ -5084,23 +5118,24 @@
       data.combat = { ventureBlockedDate: null, encountersToday: 0, lastEncounterDate: null };
     }
 
-    /* Reset daily counter and restore HP to full if new day */
-    var today = new Date().toISOString().slice(0,10);
-    if (data.combat.lastEncounterDate !== today) {
-      data.combat.encountersToday = 0;
-      data.combat.lastEncounterDate = today;
-      /* HP restores fully at the start of each new day */
-      var lvl2      = data.character.level || 1;
-      var core2     = data.stats ? (data.stats.core || 0) : 0;
-      var freshMaxHp = (lvl2 * 10) + Math.floor(core2 / 10 * 5) + 40;
-      data.character.hp    = freshMaxHp;
-      data.character.maxHp = freshMaxHp;
-      saveData(data);
-    }
+    /* Daily reset (HP, tier tracking, counters) — uses shared helper */
+    applyDailyReset(data);
+    data = loadData(); /* reload after possible save inside helper */
 
     CS.encountersToday = data.combat.encountersToday || 0;
 
     var monster = selectMonster(data);
+
+    /* No valid tiers remain today */
+    if (!monster) {
+      var lvlNow  = data.character.level || 1;
+      var maxNow  = lvlNow >= 6 ? 5 : lvlNow >= 4 ? 3 : lvlNow >= 2 ? 2 : 1;
+      var minNow  = Math.max(1, lvlNow - 1);
+      var fought  = (data.combat.tiersFoughtToday || []).join(', ');
+      alert('You have pushed as far as the road allows today. Tiers ' + fought + ' have already been met. Return tomorrow.');
+      return;
+    }
+
     CS.monster = monster;
 
     /* Populate encounter preview */
@@ -5727,11 +5762,17 @@
     data.character.hp   = Math.max(1, CS.playerHp);
     data.character.mana = CS.mana; /* persist mana spent during combat */
 
-    /* Save encounter count */
+    /* Save encounter count and record which tier was just fought */
     if (!data.combat) data.combat = {};
     data.combat.encountersToday   = (CS.encountersToday || 0) + 1;
     data.combat.lastEncounterDate = new Date().toISOString().slice(0,10);
     CS.encountersToday = data.combat.encountersToday;
+    /* Track tier fought so it cannot be repeated today */
+    if (!data.combat.tiersFoughtToday) data.combat.tiersFoughtToday = [];
+    var fightTier = CS.monster ? CS.monster.tier : 1;
+    if (data.combat.tiersFoughtToday.indexOf(fightTier) === -1) {
+      data.combat.tiersFoughtToday.push(fightTier);
+    }
 
     /* Update XP bar on home screen */
     var xpThresholds = [0,200,600,1800,5400,16200,48600,145800,437400,1312200];
@@ -7235,6 +7276,10 @@
       checkRestorationStreak(data);
 
       /* Re-load after possible saves inside checks */
+      data = loadData();
+
+      /* Daily reset: restore HP and clear tier tracking if new day */
+      applyDailyReset(data);
       data = loadData();
 
       populateHomeScreen(data);
